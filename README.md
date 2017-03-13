@@ -34,14 +34,14 @@ urlpatterns = [
 
 The following endpoints are provided:
 
- * `reset_password` - request a reset password token via e-mail
- * `reset_password/confirm` - using a valid token, reset the password
+ * `reset_password` - request a reset password token by using the ``email`` parameter
+ * `reset_password/confirm` - using a valid ``token``, the users password is set to the provided ``password``
  
 ## Signals
 
 * ``reset_password_token_created(reset_password_token)`` Fired when a reset password token is generated
-* ``pre_password_reset`` - fired just before a password is being reset
-* ``post_password_reset`` - fired after a password has been reset
+* ``pre_password_reset(user)`` - fired just before a password is being reset
+* ``post_password_reset(user)`` - fired after a password has been reset
 
 ## Tests
 

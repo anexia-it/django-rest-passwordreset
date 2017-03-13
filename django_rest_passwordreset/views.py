@@ -59,8 +59,10 @@ class ResetPasswordConfirm(APIView):
 
         # change users password
         if reset_password_token.user.has_usable_password():
+            pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
             reset_password_token.user.set_password(password)
             reset_password_token.user.save()
+            post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
 
         # Delete all password reset tokens for this user
         ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()

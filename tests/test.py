@@ -33,6 +33,12 @@ class HelperMixin:
         self.reset_password_confirm_url = reverse('password_reset:reset-password-confirm')
 
     def django_check_login(self, username, password):
+        """
+        Checks the django login by querying the user from the database and calling check_password()
+        :param username:
+        :param password:
+        :return:
+        """
         user = User.objects.filter(username=username).first()
 
         return user.check_password(password)
