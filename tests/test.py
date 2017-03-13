@@ -4,6 +4,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django_rest_passwordreset.models import ResetPasswordToken
+from unittest.mock import patch
 
 # try getting reverse from django.urls
 try:
@@ -12,15 +13,6 @@ try:
 except:
     # Django 1.8 and 1.9
     from django.core.urlresolvers import reverse
-
-
-reset_password_token_signal_call_count = 0
-last_reset_password_token = ""
-
-def count_reset_password_token_signal(reset_password_token, *args, **kwargs):
-    global reset_password_token_signal_call_count, last_reset_password_token
-    reset_password_token_signal_call_count += 1
-    last_reset_password_token = reset_password_token
 
 
 class HelperMixin:
@@ -82,23 +74,20 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.user1 = User.objects.create_user("user1", "user1@mail.com", "secret1")
         self.user2 = User.objects.create_user("user2", "user2@mail.com", "secret2")
 
-    def test_reset_password(self):
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    def test_reset_password(self, mock_reset_password_token_created):
         """ Tests resetting a password """
 
         # there should be zero tokens
         self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
 
-        # we need to check whether the signal is getting called
-        global reset_password_token_signal_call_count
-        reset_password_token_signal_call_count = 0
-
-        from django_rest_passwordreset.signals import reset_password_token_created
-        reset_password_token_created.connect(count_reset_password_token_signal)
-
         response = self.rest_do_request_reset_token(email="user1@mail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(reset_password_token_signal_call_count, 1)
-        self.assertNotEqual(last_reset_password_token, "")
+        # check that the signal was sent once
+        self.assertTrue(mock_reset_password_token_created.called)
+        self.assertEqual(mock_reset_password_token_created.call_count, 1)
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
 
         # there should be one token
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
@@ -106,8 +95,9 @@ class AuthTestCase(APITestCase, HelperMixin):
         # if the same user tries to reset again, the user will get the same token again
         response = self.rest_do_request_reset_token(email="user1@mail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(reset_password_token_signal_call_count, 2)
-        self.assertNotEqual(last_reset_password_token, "")
+        self.assertEqual(mock_reset_password_token_created.call_count, 2)
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
 
         # there should be one token
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
@@ -136,28 +126,29 @@ class AuthTestCase(APITestCase, HelperMixin):
             msg="User 1 should be able to login with the modified credentials"
         )
 
-    def test_reset_password_multiple_users(self):
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    def test_reset_password_multiple_users(self, mock_reset_password_token_created):
         """ Checks whether multiple password reset tokens can be created for different users """
         # connect signal
         # we need to check whether the signal is getting called
-        global reset_password_token_signal_call_count, last_reset_password_token
-        reset_password_token_signal_call_count = 0
 
-        from django_rest_passwordreset.signals import reset_password_token_created
-        reset_password_token_created.connect(count_reset_password_token_signal)
 
         # create a token for user 1
         response = self.rest_do_request_reset_token(email="user1@mail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
-        token1 = last_reset_password_token
+        self.assertTrue(mock_reset_password_token_created.called)
+        self.assertEquals(mock_reset_password_token_created.call_count, 1)
+        token1 = mock_reset_password_token_created.call_args[1]['reset_password_token']
 
         # create another token for user 2
         response = self.rest_do_request_reset_token(email="user2@mail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         tokens = ResetPasswordToken.objects.all()
         self.assertEqual(tokens.count(), 2)
-        token2 = last_reset_password_token
+        self.assertEquals(mock_reset_password_token_created.call_count, 2)
+        token2 = mock_reset_password_token_created.call_args[1]['reset_password_token']
 
         # validate that those two tokens are different
         self.assertNotEqual(tokens[0].key, tokens[1].key)
@@ -194,6 +185,21 @@ class AuthTestCase(APITestCase, HelperMixin):
             self.django_check_login("user2", "secret2_new"),
         )
 
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    @patch('django_rest_passwordreset.signals.pre_password_reset.send')
+    @patch('django_rest_passwordreset.signals.post_password_reset.send')
+    def test_signals(self,
+                     mock_reset_password_token_created,
+                     mock_pre_password_reset,
+                     mock_post_password_reset):
+        # check that all mocks have not been called yet
+        self.assertFalse(mock_reset_password_token_created.called)
+        self.assertFalse(mock_post_password_reset.called)
+        self.assertFalse(mock_pre_password_reset.called)
+
+        # request token
+
+        # reset password
 
 
 
