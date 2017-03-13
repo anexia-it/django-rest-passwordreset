@@ -4,7 +4,11 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django_rest_passwordreset.models import ResetPasswordToken
-from unittest.mock import patch
+try:
+    from unittest.mock import patch
+except:
+    # Python 2.7 fallback
+    from mock import patch
 
 # try getting reverse from django.urls
 try:
@@ -189,17 +193,39 @@ class AuthTestCase(APITestCase, HelperMixin):
     @patch('django_rest_passwordreset.signals.pre_password_reset.send')
     @patch('django_rest_passwordreset.signals.post_password_reset.send')
     def test_signals(self,
-                     mock_reset_password_token_created,
+                     mock_post_password_reset,
                      mock_pre_password_reset,
-                     mock_post_password_reset):
+                     mock_reset_password_token_created
+                     ):
         # check that all mocks have not been called yet
         self.assertFalse(mock_reset_password_token_created.called)
         self.assertFalse(mock_post_password_reset.called)
         self.assertFalse(mock_pre_password_reset.called)
 
-        # request token
+        # request token for user1
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # verify that the reset_password_token_created signal was fired
+        self.assertTrue(mock_reset_password_token_created.called)
+        self.assertEquals(mock_reset_password_token_created.call_count, 1)
+
+        token1 = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(token1.key, "", msg="Verify that the reset_password_token of the reset_password_Token_created signal is not empty")
+
+        # verify that the other two signals have not yet been called
+        self.assertFalse(mock_post_password_reset.called)
+        self.assertFalse(mock_pre_password_reset.called)
 
         # reset password
+        response = self.rest_do_reset_password_with_token(token1.key, "new_secret")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # now the other two signals should have been called
+        self.assertTrue(mock_post_password_reset.called)
+        self.assertTrue(mock_pre_password_reset.called)
+
 
 
 
