@@ -1,0 +1,38 @@
+language: python
+python: # test various python versions, Django supports all of them
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "nightly" # currently points to 3.6-dev
+env:
+  matrix:
+    - DJANGO_VERSION=1.8 DJANGO_REST_VERSION=3.4
+    - DJANGO_VERSION=1.8 DJANGO_REST_VERSION=3.5
+    - DJANGO_VERSION=1.9 DJANGO_REST_VERSION=3.4
+    - DJANGO_VERSION=1.9 DJANGO_REST_VERSION=3.5
+    - DJANGO_VERSION=1.9 DJANGO_REST_VERSION=3.6
+    - DJANGO_VERSION=1.10 DJANGO_REST_VERSION=3.4
+    - DJANGO_VERSION=1.10 DJANGO_REST_VERSION=3.5
+    - DJANGO_VERSION=1.10 DJANGO_REST_VERSION=3.6
+    - DJANGO_VERSION=1.11b1 DJANGO_REST_VERSION=3.4
+    - DJANGO_VERSION=1.11b1 DJANGO_REST_VERSION=3.5
+    - DJANGO_VERSION=1.11b1 DJANGO_REST_VERSION=3.6
+    - DJANGO_VERSION=1.8.* DJANGO_REST_VERSION=3.4.*
+    - DJANGO_VERSION=1.8.* DJANGO_REST_VERSION=3.5.*
+    - DJANGO_VERSION=1.9.* DJANGO_REST_VERSION=3.4.*
+    - DJANGO_VERSION=1.9.* DJANGO_REST_VERSION=3.5.*
+    - DJANGO_VERSION=1.9.* DJANGO_REST_VERSION=3.6.*
+    - DJANGO_VERSION=1.10.* DJANGO_REST_VERSION=3.4.*
+    - DJANGO_VERSION=1.10.* DJANGO_REST_VERSION=3.5.*
+    - DJANGO_VERSION=1.10.* DJANGO_REST_VERSION=3.6.*
+cache:
+  directories:
+    - $HOME/.cache/pip
+install:
+  - pip install -q Django==$DJANGO_VERSION # install custom django version
+  - pip install -q djangorestframework==$DJANGO_REST_VERSION # install custom django rest framework version
+script:
+  - python setup.py install
+  - cd tests/
+  - python manage.py test # just need to run normal tests for now
