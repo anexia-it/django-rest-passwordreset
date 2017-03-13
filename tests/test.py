@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django_rest_multitokenauth.models import MultiToken, ResetPasswordToken
+from django_rest_passwordreset.models import ResetPasswordToken
 
 # try getting reverse from django.urls
 try:
@@ -29,12 +29,13 @@ class HelperMixin:
     """
     def setUpUrls(self):
         """ set up urls by using djangos reverse function """
-        self.reset_password_request_url = reverse('password_reset:auth-reset-password-request')
-        self.reset_password_confirm_url = reverse('password_reset:auth-reset-password-confirm')
+        self.reset_password_request_url = reverse('password_reset:reset-password-request')
+        self.reset_password_confirm_url = reverse('password_reset:reset-password-confirm')
 
     def django_check_login(self, username, password):
-        # ToDo: Check Login
-        pass
+        user = User.objects.filter(username=username).first()
+
+        return user.check_password(password)
 
     def rest_do_request_reset_token(self, email, HTTP_USER_AGENT='', REMOTE_ADDR='127.0.0.1'):
         """ REST API wrapper for requesting a password reset token """
@@ -175,7 +176,7 @@ class AuthTestCase(APITestCase, HelperMixin):
 
         # user 2 should be able to login with "secret2_new" now
         self.assertTrue(
-            self.django_check_login("user", "secret2_new"),
+            self.django_check_login("user2", "secret2_new"),
         )
 
         # try to reset again with token2 (should not work)
