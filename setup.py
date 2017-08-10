@@ -10,13 +10,13 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-rest-passwordreset',
-    version='0.9.0',
+    version='0.9.1',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',
     description='An extension of django rest framework, providing a password reset strategy',
     long_description=README,
-    url='https://chkr.at/',
+    url='https://github.com/anx-ckreuzberger/django-rest-multiauthtoken',
     author='Christian Kreuzberger',
     author_email='ckreuzberger@anexia-it.com',
     classifiers=[
