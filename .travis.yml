@@ -7,17 +7,6 @@ python: # test various python versions, Django supports all of them
   - "nightly" # currently points to 3.6-dev
 env:
   matrix:
-    - DJANGO_VERSION=1.8 DJANGO_REST_VERSION=3.4
-    - DJANGO_VERSION=1.8 DJANGO_REST_VERSION=3.5
-    - DJANGO_VERSION=1.9 DJANGO_REST_VERSION=3.4
-    - DJANGO_VERSION=1.9 DJANGO_REST_VERSION=3.5
-    - DJANGO_VERSION=1.9 DJANGO_REST_VERSION=3.6
-    - DJANGO_VERSION=1.10 DJANGO_REST_VERSION=3.4
-    - DJANGO_VERSION=1.10 DJANGO_REST_VERSION=3.5
-    - DJANGO_VERSION=1.10 DJANGO_REST_VERSION=3.6
-    - DJANGO_VERSION=1.11 DJANGO_REST_VERSION=3.4
-    - DJANGO_VERSION=1.11 DJANGO_REST_VERSION=3.5
-    - DJANGO_VERSION=1.11 DJANGO_REST_VERSION=3.6
     - DJANGO_VERSION=1.8.* DJANGO_REST_VERSION=3.4.*
     - DJANGO_VERSION=1.8.* DJANGO_REST_VERSION=3.5.*
     - DJANGO_VERSION=1.9.* DJANGO_REST_VERSION=3.4.*
@@ -31,23 +20,13 @@ env:
     - DJANGO_VERSION=1.11.* DJANGO_REST_VERSION=3.5.*
     - DJANGO_VERSION=1.11.* DJANGO_REST_VERSION=3.6.*
     - DJANGO_VERSION=1.11.* DJANGO_REST_VERSION=3.7.*
-    - DJANGO_VERSION=2.0a1 DJANGO_REST_VERSION=3.7.*
+    - DJANGO_VERSION=2.0b1 DJANGO_REST_VERSION=3.7.*
 matrix:
   exclude:
-    - python: "3.3"
-      env: DJANGO_VERSION=1.9 # Django 1.9 does not support python 3.3, but 3.4+
-    - python: "3.3"
-      env: DJANGO_VERSION=1.10 # Django 1.10 does not support python 3.3, but 3.4+
-    - python: "3.3"
-      env: DJANGO_VERSION=1.11
-    - python: "3.3"
-      env: DJANGO_VERSION=2.0a1
     - python: "2.7"
-      env: DJANGO_VERSION=2.0a1
+      env: DJANGO_VERSION=2.0b1 DJANGO_REST_VERSION=3.7.*
     - python: "pypy"
-      env: DJANGO_VERSION=2.0a1
-    - python: "3.7-dev"
-      env: DJANGO_VERSION=1.8 # Django 1.8 might not work with python 3.7
+      env: DJANGO_VERSION=2.0b1 DJANGO_REST_VERSION=3.7.*
     - python: "nightly"
       env: DJANGO_VERSION=1.8 # Django 1.8 might not work with future versions of python
 cache:
