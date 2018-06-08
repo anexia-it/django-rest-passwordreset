@@ -16,6 +16,7 @@ setup(
     license='BSD License',
     description='An extension of django rest framework, providing a password reset strategy',
     long_description=README,
+    long_description_content_type='text/markdown',  # This is important for README.md in markdown format
     url='https://github.com/anx-ckreuzberger/django-rest-passwordreset',
     author='Christian Kreuzberger',
     author_email='ckreuzberger@anexia-it.com',
