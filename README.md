@@ -1,10 +1,23 @@
 # Django Rest Password Reset
-This django app provides a password reset strategy for django rest framework, where users can request password 
+This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
 
-## How to use
+The main idea behind this package is to not make any assumptions about how the token is delivered to the end-user (e-mail, text-message, etc...).
+Instead, this package provides a signal that can be reacted on (e.g., by sending an e-mail or a text message).
 
-Django settings file:
+This package basically provides two REST endpoints:
+
+* Request a token
+* Verify (confirm) a token (and change the password)
+
+## Quickstart
+
+1. Install the package from pypi using pip:
+```bash
+pip install django-rest-passwordreset
+```
+
+2. Add ``django_rest_passwordreset`` to your ``INSTALLED_APPS`` (after ``rest_framework``) within your Django settings file:
 ```python
 INSTALLED_APPS = (
     ...
@@ -15,11 +28,9 @@ INSTALLED_APPS = (
     'django_rest_passwordreset',
     ...
 )
-
 ```
 
-
-Django url settings:
+3. This package provides two endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
 from django.conf.urls import url, include
 
@@ -30,18 +41,73 @@ urlpatterns = [
     ...
 ]    
 ```
+**Note**: You can adapt the url to your needs.
 
+### Endpoints
 
 The following endpoints are provided:
 
  * `reset_password` - request a reset password token by using the ``email`` parameter
  * `reset_password/confirm` - using a valid ``token``, the users password is set to the provided ``password``
  
-## Signals
+### Signals
 
 * ``reset_password_token_created(reset_password_token)`` Fired when a reset password token is generated
 * ``pre_password_reset(user)`` - fired just before a password is being reset
 * ``post_password_reset(user)`` - fired after a password has been reset
+
+### Example for sending an e-mail
+
+1. Create two new django templates: `email/user_reset_password.html` and `email/user_reset_password.txt`. Those templates will contain the e-mail message sent to the user, aswell as the password reset link (or token).
+Within the templates, you can access the following context variables: `current_user`, `username`, `email`, `reset_password_url`. Feel free to adapt this to your needs.
+
+2. Add the following code, which contains a Django Signal, to your application (see [this part of the django documentation](https://docs.djangoproject.com/en/1.11/topics/signals/#connecting-receiver-functions) for more information on where to put signals).
+```python
+from django.dispatch import receiver
+from django_rest_passwordreset.signals import reset_password_token_created
+
+
+@receiver(reset_password_token_created)
+def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
+    """
+    Handles password reset tokens
+    When a token is created, an e-mail needs to be sent to the user
+    :param sender:
+    :param reset_password_token:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    # send an e-mail to the user
+    context = {
+        'current_user': reset_password_token.user,
+        'username': reset_password_token.user.username,
+        'email': reset_password_token.user.email,
+        # ToDo: The URL can (and should) be constructed using pythons built-in `reverse` method.
+        'reset_password_url': "http://some_url/reset/?token={token}".format(token=reset_password_token.key)
+    }
+
+    # render email text
+    email_html_message = render_to_string('email/user_reset_password.html', context)
+    email_plaintext_message = render_to_string('email/user_reset_password.txt', context)
+
+    msg = EmailMultiAlternatives(
+        # title:
+        _("Password Reset for {title}".format(title="Some website title")),
+        # message:
+        email_plaintext_message,
+        # from:
+        "noreply@somehost.local",
+        # to:
+        [reset_password_token.user.email]
+    )
+    msg.attach_alternative(email_html_message, "text/html")
+    msg.send()
+
+```
+
+3. You should now be able to use the endpoints to request a password reset token via your e-mail address. 
+If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
 
 ## Tests
 
