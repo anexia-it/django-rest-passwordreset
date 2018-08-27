@@ -24,6 +24,10 @@ class ResetPasswordToken(models.Model):
         """ generates a pseudo random code using os.urandom and binascii.hexlify """
         return binascii.hexlify(os.urandom(32)).decode()
 
+    id = models.AutoField(
+        primary_key=True
+    )
+
     user = models.ForeignKey(
         AUTH_USER_MODEL,
         related_name='password_reset_tokens',
@@ -36,10 +40,12 @@ class ResetPasswordToken(models.Model):
         verbose_name=_("When was this token generated")
     )
 
+    # Key field, though it is not the primary key of the model
     key = models.CharField(
         _("Key"),
         max_length=64,
-        primary_key=True
+        db_index=True,
+        unique=True
     )
 
     ip_address = models.GenericIPAddressField(

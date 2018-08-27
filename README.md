@@ -1,4 +1,5 @@
 # Django Rest Password Reset
+
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
 
