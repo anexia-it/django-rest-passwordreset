@@ -66,6 +66,7 @@ Within the templates, you can access the following context variables: `current_u
 ```python
 from django.dispatch import receiver
 from django_rest_passwordreset.signals import reset_password_token_created
+from django.urls import reverse
 
 
 @receiver(reset_password_token_created)
