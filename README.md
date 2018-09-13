@@ -66,6 +66,7 @@ Within the templates, you can access the following context variables: `current_u
 ```python
 from django.dispatch import receiver
 from django_rest_passwordreset.signals import reset_password_token_created
+from django.urls import reverse
 
 
 @receiver(reset_password_token_created)
@@ -84,8 +85,7 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
-        # ToDo: The URL can (and should) be constructed using pythons built-in `reverse` method.
-        'reset_password_url': "http://some_url/reset/?token={token}".format(token=reset_password_token.key)
+        'reset_password_url': "{}?token={}".format(reverse('password_reset:reset-password-request'), reset_password_token.key)
     }
 
     # render email text
