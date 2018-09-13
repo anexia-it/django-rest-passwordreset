@@ -130,11 +130,19 @@ class ResetPasswordRequestToken(APIView):
                     # yes, already has a token, re-use this token
                     token = user.password_reset_tokens.all()[0]
                 else:
+                    ip = request.META['REMOTE_ADDR']
+                    
+                    # REMOTE_ADDR may be blank if server sits behind a load balancer, causing an exception
+                    # HTTP_X_FORWARDED_FOR as a fallback would be acceptable, since it's for logging purposes
+                    # and not authentication (also hard to spoof if load balancer is configured corrrectly)
+                    if ip == b'':
+                        ip = request.META['HTTP_X_FORWARDED_FOR']
+                    
                     # no token exists, generate a new token
                     token = ResetPasswordToken.objects.create(
                         user=user,
                         user_agent=request.META['HTTP_USER_AGENT'],
-                        ip_address=request.META['REMOTE_ADDR']
+                        ip_address=ip
                     )
                 # send a signal that the password token was created
                 # let whoever receives this signal handle sending the email for the password reset
