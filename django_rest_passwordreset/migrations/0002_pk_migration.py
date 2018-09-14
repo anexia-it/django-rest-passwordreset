@@ -22,26 +22,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='resetpasswordtoken',
-            name='id',
-            field=models.IntegerField(null=True),
-            preserve_default=True,
-        ),
-        migrations.RunPython(
-            populate_auto_incrementing_pk_field,
-            migrations.RunPython.noop
-        ),
-        # add primary key information to id field
-        migrations.AlterField(
-            model_name='resetpasswordtoken',
-            name='id',
-            field=models.AutoField(primary_key=True, serialize=False)
-        ),
         # remove primary key information from 'key' field
         migrations.AlterField(
             model_name='resetpasswordtoken',
             name='key',
-            field=models.CharField(db_index=True, max_length=64, unique=True, verbose_name='Key'),
+            field=models.CharField(db_index=True, primary_key=False, max_length=64, unique=True, verbose_name='Key'),
+        ),
+        # add a new id field
+        migrations.AddField(
+            model_name='resetpasswordtoken',
+            name='id',
+            field=models.AutoField(primary_key=True, serialize=False),
+            preserve_default=False,
+        ),
+        migrations.RunPython(
+            populate_auto_incrementing_pk_field,
+            migrations.RunPython.noop
         ),
     ]
