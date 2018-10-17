@@ -48,8 +48,10 @@ urlpatterns = [
 
 The following endpoints are provided:
 
- * `reset_password` - request a reset password token by using the ``email`` parameter
- * `reset_password/confirm` - using a valid ``token``, the users password is set to the provided ``password``
+ * `POST ${API_URL}/reset_password` - request a reset password token by using the ``email`` parameter
+ * `POST ${API_URL}/reset_password/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
+ 
+where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
  
 ### Signals
 
@@ -109,6 +111,17 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
 
 3. You should now be able to use the endpoints to request a password reset token via your e-mail address. 
 If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
+
+## Known Issues
+
+### Django 2.1 Migrations - Multiple Primary keys for table ...
+Django 2.1 introduced a breaking change for migrations (see [Django Issue #29790](https://code.djangoproject.com/ticket/29790)). We therefore had to rewrite the migration [0002_pk_migration.py](django_rest_passwordreset/migrations/0002_pk_migration.py) such that it covers Django versions before (`<`) 2.1 and later (`>=`) 2.1.
+
+Some information is written down in Issue #8.
+
+## Contributions
+
+This library tries to follow the unix philosophy of "do one thing and do it well" (which is providing a basic password reset endpoint for Django Rest Framework). Contributions are welcome in the form of pull requests and issues! If you create a pull request, please make sure that you are not introducing breaking changes. 
 
 ## Tests
 
