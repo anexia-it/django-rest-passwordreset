@@ -1,5 +1,9 @@
 # Django Rest Password Reset
 
+[![PyPI version](https://badge.fury.io/py/django-rest-passwordreset.svg)](https://badge.fury.io/py/django-rest-passwordreset)
+[![Build Status](https://travis-ci.org/anx-ckreuzberger/django-rest-passwordreset.svg?branch=master)](https://travis-ci.org/anx-ckreuzberger/django-rest-passwordreset)
+[![Known Vulnerabilities](https://snyk.io/test/github/anx-ckreuzberger/django-rest-passwordreset/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/anx-ckreuzberger/django-rest-passwordreset?targetFile=requirements.txt)
+
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
 
@@ -48,7 +52,7 @@ urlpatterns = [
 
 The following endpoints are provided:
 
- * `POST ${API_URL}/reset_password` - request a reset password token by using the ``email`` parameter
+ * `POST ${API_URL}/reset_password/` - request a reset password token by using the ``email`` parameter
  * `POST ${API_URL}/reset_password/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
  
 where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
