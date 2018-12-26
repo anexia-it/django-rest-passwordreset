@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
-from django_rest_passwordreset.models import ResetPasswordToken
+from django_rest_passwordreset.models import ResetPasswordToken, clear_expired
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
 
 User = get_user_model()
@@ -96,7 +96,7 @@ class ResetPasswordRequestToken(APIView):
         now_minus_expiry_time = timezone.now() - timedelta(hours=password_reset_token_validation_time)
 
         # delete all tokens where created_at < now - 24 hours
-        ResetPasswordToken.objects.filter(created_at__lte=now_minus_expiry_time).delete()
+        clear_expired(now_minus_expiry_time)
 
         # find a user by email address (case insensitive search)
         users = User.objects.filter(email__iexact=email)

@@ -65,3 +65,7 @@ class ResetPasswordToken(models.Model):
 
     def __str__(self):
         return "Password reset token for user {user}".format(user=self.user)
+
+
+def clear_expired(now_minus_expiry_time):
+    ResetPasswordToken.objects.filter(created_at__lte=now_minus_expiry_time).delete()
