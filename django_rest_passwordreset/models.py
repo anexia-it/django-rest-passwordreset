@@ -67,5 +67,19 @@ class ResetPasswordToken(models.Model):
         return "Password reset token for user {user}".format(user=self.user)
 
 
-def clear_expired(now_minus_expiry_time):
-    ResetPasswordToken.objects.filter(created_at__lte=now_minus_expiry_time).delete()
+def get_password_reset_token_expiry_time():
+    """
+    Returns the password reset token expirty time in hours (default: 24)
+    Set Django SETTINGS.DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME to overwrite this time
+    :return: expiry time
+    """
+    # get token validation time
+    return getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME', 24)
+
+
+def clear_expired(expiry_time):
+    """
+    Remove all expired tokens
+    :param expiry_time: Token expiration time
+    """
+    ResetPasswordToken.objects.filter(created_at__lte=expiry_time).delete()

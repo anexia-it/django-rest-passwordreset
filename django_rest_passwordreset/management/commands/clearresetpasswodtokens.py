@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from django_rest_passwordreset.models import clear_expired
-from django_rest_passwordreset.views import get_password_reset_token_expiry_time
+from django_rest_passwordreset.models import clear_expired, get_password_reset_token_expiry_time
 
 
 class Command(BaseCommand):
