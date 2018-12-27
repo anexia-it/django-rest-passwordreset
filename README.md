@@ -57,6 +57,15 @@ The following endpoints are provided:
  
 where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
  
+
+### Configuration / Settings
+
+The following settings can be set in Djangos ``settings.py`` file:
+
+* `DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME` - time in hours about how long the token is active (Default: 24)
+
+  **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``.
+ 
 ### Signals
 
 * ``reset_password_token_created(reset_password_token)`` Fired when a reset password token is generated
