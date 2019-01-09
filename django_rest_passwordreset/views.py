@@ -1,7 +1,6 @@
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -10,20 +9,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
-from django_rest_passwordreset.models import ResetPasswordToken
+from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
 
 User = get_user_model()
-
-
-def get_password_reset_token_expiry_time():
-    """
-    Returns the password reset token expirty time in hours (default: 24)
-    Set Django SETTINGS.DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME to overwrite this time
-    :return: expiry time
-    """
-    # get token validation time
-    return getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME', 24)
 
 
 class ResetPasswordConfirm(APIView):
@@ -96,7 +85,7 @@ class ResetPasswordRequestToken(APIView):
         now_minus_expiry_time = timezone.now() - timedelta(hours=password_reset_token_validation_time)
 
         # delete all tokens where created_at < now - 24 hours
-        ResetPasswordToken.objects.filter(created_at__lte=now_minus_expiry_time).delete()
+        clear_expired(now_minus_expiry_time)
 
         # find a user by email address (case insensitive search)
         users = User.objects.filter(email__iexact=email)
