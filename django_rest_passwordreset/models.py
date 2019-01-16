@@ -1,16 +1,19 @@
-import binascii
-import os
-
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from django_rest_passwordreset.tokens import get_token_generator
+
 # Prior to Django 1.5, the AUTH_USER_MODEL setting does not exist.
 # Note that we don't perform this code in the compat module due to
 # bug report #1297
 # See: https://github.com/tomchristie/django-rest-framework/issues/1297
+
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
+# get the token generator class
+TOKEN_GENERATOR_CLASS = get_token_generator()
 
 
 @python_2_unicode_compatible
@@ -22,7 +25,7 @@ class ResetPasswordToken(models.Model):
     @staticmethod
     def generate_key():
         """ generates a pseudo random code using os.urandom and binascii.hexlify """
-        return binascii.hexlify(os.urandom(32)).decode()
+        return TOKEN_GENERATOR_CLASS.generate_token()
 
     id = models.AutoField(
         primary_key=True
