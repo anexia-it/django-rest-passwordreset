@@ -1,6 +1,7 @@
 import os
 import binascii
 import random
+from importlib import import_module
 
 from django.conf import settings
 
@@ -21,8 +22,11 @@ def get_token_generator():
     # check if something is in the settings object, and work with it
     if DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG:
         if "CLASS" in DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG:
-            # ToDo: this is unsecure, as eval allows execution of arbitrary python code
-            token_class = eval(DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG["CLASS"])
+            class_path_name = DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG["CLASS"]
+            module_name, class_name = class_path_name.rsplit('.', 1)
+
+            mod = import_module(module_name)
+            token_class = getattr(mod, class_name)
 
         if "OPTIONS" in DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG:
             options = DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG["OPTIONS"]
@@ -61,8 +65,8 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 
         # generate the token using os.urandom and hexlify
         return binascii.hexlify(
-            os.urandom(length)
-        ).decode()
+            os.urandom(self.max_length)
+        ).decode()[0:length]
 
 
 class RandomNumberTokenGenerator(BaseTokenGenerator):
@@ -75,4 +79,4 @@ class RandomNumberTokenGenerator(BaseTokenGenerator):
 
     def generate_token(self, *args, **kwargs):
         # generate a random number between min_number and max_number
-        return random.randint(self.min_number, self.max_number)
+        return str(random.randint(self.min_number, self.max_number))

@@ -126,6 +126,93 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
 If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
 
 
+## Custom Token Generator
+
+By default, a random string token of length 10 to 50 is generated using the ``RandomStringTokenGenerator`` class.
+This library offers a possibility to configure the params of ``RandomStringTokenGenerator`` as well as switch to
+another token generator, e.g. ``RandomNumberTokenGenerator``. You can also generate your own token generator class.
+
+You can change that by adding 
+```python
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": ...,
+    "OPTIONS": {...}
+}
+```
+into Django settings.py file.
+
+
+### RandomStringTokenGenerator
+This is the default configuration. 
+```python
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator"
+}
+```
+
+You can configure the length as follows:
+```python
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator",
+    "OPTIONS": {
+        "min_length": 20,
+        "max_lenght": 30
+    }
+}
+```
+   
+
+### RandomNumberTokenGenerator
+```python
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomNumberTokenGenerator"
+}
+```
+
+You can configure the minimum and maximum number as follows:
+```python
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomNumberTokenGenerator",
+    "OPTIONS": {
+        "min_number": 1500,
+        "max_number": 9999
+    }
+}
+```
+
+
+### Write your own Token Generator
+
+Please see [token_configuration/django_rest_passwordreset/tokens.py](token_configuration/django_rest_passwordreset/tokens.py) for example implementation of number and string token generator.
+
+The basic idea is to create a new class that inherits from BaseTokenGenerator, takes arbitrary arguments (`args` and `kwargs`)
+in the ``__init__`` function as well as implementing a `generate_token` function.
+
+```python
+from django_rest_passwordreset.tokens import BaseTokenGenerator
+
+
+class RandomStringTokenGenerator(BaseTokenGenerator):
+    """
+    Generates a random string with min and max length using os.urandom and binascii.hexlify
+    """
+
+    def __init__(self, min_length=10, max_length=50, *args, **kwargs):
+        self.min_length = min_length
+        self.max_length = max_length
+
+    def generate_token(self, *args, **kwargs):
+        """ generates a pseudo random code using os.urandom and binascii.hexlify """
+        # determine the length based on min_length and max_length
+        length = random.randint(self.min_length, self.max_length)
+
+        # generate the token using os.urandom and hexlify
+        return binascii.hexlify(
+            os.urandom(self.max_length)
+        ).decode()[0:length]
+```
+
+
 ## Compatibility Matrix
 
 This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
