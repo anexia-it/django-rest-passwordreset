@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import parsers, renderers, status
 from rest_framework.response import Response
@@ -22,13 +23,17 @@ class ResetPasswordConfirm(APIView):
     throttle_classes = ()
     permission_classes = ()
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
+    renderer_classes = (renderers.JSONRenderer, renderers.BrowsableAPIRenderer)
     serializer_class = PasswordTokenSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data['password']
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return Response({'status': e})
         token = serializer.validated_data['token']
 
         # get token validation time
