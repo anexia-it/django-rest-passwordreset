@@ -16,6 +16,14 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.user1 = User.objects.create_user("user1", "user1@mail.com", "secret1")
         self.user2 = User.objects.create_user("user2", "user2@mail.com", "secret2")
 
+    def test_try_reset_password_email_does_not_exist(self):
+        """ Tests requesting a token for an email that does not exist """
+        response = self.rest_do_request_reset_token(email="foobar@doesnotexist.com")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        decoded_response = json.loads(response.content.decode())
+        # response should have "email" in it
+        self.assertTrue("email" in decoded_response)
+
     @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
     def test_reset_password(self, mock_reset_password_token_created):
         """ Tests resetting a password """

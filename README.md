@@ -223,6 +223,16 @@ django-rest-passwordreset Version | Django Versions | Django Rest Framework Vers
 0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9
 1.0 (WIP) | 1.11, 2.0, 2.2 | 3.6 - 3.9
 
+## Documentation / Browsable API
+
+This package supports the [DRF auto-generated documentation](https://www.django-rest-framework.org/topics/documenting-your-api/) (via `coreapi`) as well as the [DRF browsable API](https://www.django-rest-framework.org/topics/browsable-api/).
+
+![drf_browsable_email_validation](docs/browsable_api_email_validation.png "Browsable API E-Mail Validation")
+
+![drf_browsable_password_validation](docs/browsable_api_password_validation.png "Browsable API E-Mail Validation")
+
+![coreapi_docs](docs/coreapi_docs.png "Core API Docs")
+
 
 ## Known Issues
 

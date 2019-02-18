@@ -1,12 +1,12 @@
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from rest_framework import parsers, renderers, status
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time
@@ -15,14 +15,12 @@ from django_rest_passwordreset.signals import reset_password_token_created, pre_
 User = get_user_model()
 
 
-class ResetPasswordConfirm(APIView):
+class ResetPasswordConfirm(GenericAPIView):
     """
     An Api View which provides a method to reset a password based on a unique token
     """
     throttle_classes = ()
     permission_classes = ()
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
     serializer_class = PasswordTokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -61,7 +59,7 @@ class ResetPasswordConfirm(APIView):
         return Response({'status': 'OK'})
 
 
-class ResetPasswordRequestToken(APIView):
+class ResetPasswordRequestToken(GenericAPIView):
     """
     An Api View which provides a method to request a password reset token based on an e-mail address
 
@@ -69,8 +67,6 @@ class ResetPasswordRequestToken(APIView):
     """
     throttle_classes = ()
     permission_classes = ()
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
     serializer_class = EmailSerializer
 
     def post(self, request, *args, **kwargs):
@@ -102,10 +98,9 @@ class ResetPasswordRequestToken(APIView):
         # No active user found, raise a validation error
         if not active_user_found:
             raise ValidationError({
-                'email': ValidationError(
-                    _("There is no active user associated with this e-mail address or the password can not be changed"),
-                    code='invalid')}
-            )
+                'email': [_(
+                    "There is no active user associated with this e-mail address or the password can not be changed")],
+            })
 
         # last but not least: iterate over all users that are active and can change their password
         # and create a Reset Password Token and send a signal with the created token
