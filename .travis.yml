@@ -8,7 +8,6 @@ python: # test various python versions (Django Support for various python versio
   - "pypy"  # PyPy2
   - "pypy3" # PyPy3
 env:
-  - DJANGO=1.8
   - DJANGO=1.11
   - DJANGO=2.0
   - DJANGO=2.1
