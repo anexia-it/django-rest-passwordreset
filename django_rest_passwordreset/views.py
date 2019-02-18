@@ -1,10 +1,10 @@
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from rest_framework import parsers, renderers, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -22,7 +22,6 @@ class ResetPasswordConfirm(APIView):
     throttle_classes = ()
     permission_classes = ()
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
     serializer_class = PasswordTokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -70,7 +69,6 @@ class ResetPasswordRequestToken(APIView):
     throttle_classes = ()
     permission_classes = ()
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
     serializer_class = EmailSerializer
 
     def post(self, request, *args, **kwargs):
@@ -102,10 +100,9 @@ class ResetPasswordRequestToken(APIView):
         # No active user found, raise a validation error
         if not active_user_found:
             raise ValidationError({
-                'email': ValidationError(
-                    _("There is no active user associated with this e-mail address or the password can not be changed"),
-                    code='invalid')}
-            )
+                'email': [_(
+                    "There is no active user associated with this e-mail address or the password can not be changed")],
+            })
 
         # last but not least: iterate over all users that are active and can change their password
         # and create a Reset Password Token and send a signal with the created token
