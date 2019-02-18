@@ -125,6 +125,18 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
 3. You should now be able to use the endpoints to request a password reset token via your e-mail address. 
 If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
 
+
+## Compatibility Matrix
+
+This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
+a matrix showing the guaranteed and tested compatibility.
+
+django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions
+--------------------------------- | ----------------| ------------------------------
+0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9
+1.0 (WIP) | 1.11, 2.0, 2.2 | 3.6 - 3.9
+
+
 ## Known Issues
 
 ### Django 2.1 Migrations - Multiple Primary keys for table ...
