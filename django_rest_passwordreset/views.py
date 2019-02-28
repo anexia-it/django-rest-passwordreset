@@ -1,5 +1,6 @@
 from datetime import timedelta
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
@@ -49,6 +50,7 @@ class ResetPasswordConfirm(GenericAPIView):
         # change users password
         if reset_password_token.user.has_usable_password():
             pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
+            validate_password(password)
             reset_password_token.user.set_password(password)
             reset_password_token.user.save()
             post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
