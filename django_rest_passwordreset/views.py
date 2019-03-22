@@ -1,9 +1,11 @@
 from datetime import timedelta
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password, get_password_validators
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-
-from rest_framework import status
+from django.conf import settings
+from rest_framework import status, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -49,6 +51,11 @@ class ResetPasswordConfirm(GenericAPIView):
         # change users password
         if reset_password_token.user.has_usable_password():
             pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
+            try:
+                validate_password(password, user=reset_password_token.user, password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS))
+            except ValidationError as e:
+                raise serializers.ValidationError(e.messages)
+
             reset_password_token.user.set_password(password)
             reset_password_token.user.save()
             post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
