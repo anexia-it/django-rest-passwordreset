@@ -10,11 +10,11 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-rest-passwordreset',
-    version='1.0.0alpha1',
+    version='1.0.0alpha2',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',
-    description='An extension of django rest framework, providing a password reset strategy',
+    description='An extension of django rest framework, providing a configurable password reset strategy',
     long_description=README,
     long_description_content_type='text/markdown',  # This is important for README.md in markdown format
     url='https://github.com/anx-ckreuzberger/django-rest-passwordreset',
@@ -27,6 +27,7 @@ setup(
         'Framework :: Django :: 1.11',
         'Framework :: Django :: 2.0',
         'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.2',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
