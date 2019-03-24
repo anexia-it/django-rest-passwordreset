@@ -15,6 +15,12 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 # get the token generator class
 TOKEN_GENERATOR_CLASS = get_token_generator()
 
+__all__ = [
+    'ResetPasswordToken',
+    'get_password_reset_token_expiry_time',
+    'clear_expired',
+]
+
 
 @python_2_unicode_compatible
 class ResetPasswordToken(models.Model):
