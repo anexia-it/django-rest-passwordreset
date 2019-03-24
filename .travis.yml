@@ -11,6 +11,7 @@ env:
   - DJANGO=1.11
   - DJANGO=2.0
   - DJANGO=2.1
+  - DJANGO=2.2
   - DJANGO=master
 matrix:
   exclude:
@@ -19,13 +20,14 @@ matrix:
     - { python: "pypy", env: DJANGO=2.0 }
     - { python: "2.7", env: DJANGO=2.1 }
     - { python: "pypy", env: DJANGO=2.1 }
+    - { python: "2.7", env: DJANGO=2.2 }
+    - { python: "pypy", env: DJANGO=2.2 }
     - { python: "2.7", env: DJANGO=master }
     - { python: "pypy", env: DJANGO=master }
     # Django >= 2.1 does not support Python3.4 anymore
     - { python: "3.4", env: DJANGO=2.1 }
+    - { python: "3.4", env: DJANGO=2.2 }
     - { python: "3.4", env: DJANGO=master }
-    # Django >= 2.2 does not support Python 3.5 anymore
-    - { python: "3.5", env: DJANGO=master }
   allow_failures:
     # newer python versions aswell as pypy may also always break our build
     - python: "pypy"
