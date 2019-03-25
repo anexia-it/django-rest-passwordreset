@@ -1,10 +1,12 @@
 sudo: false
 language: python
+dist: xenial # default is ubuntu 14.04, we need at least 16.04
 python: # test various python versions (Django Support for various python versions is described within the exclude: section)
   - "2.7"
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
   - "pypy"  # PyPy2
   - "pypy3" # PyPy3
 env:
