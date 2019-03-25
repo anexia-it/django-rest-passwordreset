@@ -2,6 +2,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 
+__all__ = [
+    'EmailSerializer',
+    'PasswordTokenSerializer',
+]
+
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()

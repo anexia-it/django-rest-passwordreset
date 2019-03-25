@@ -16,6 +16,13 @@ from django_rest_passwordreset.signals import reset_password_token_created, pre_
 
 User = get_user_model()
 
+__all__ = [
+    'ResetPasswordConfirm',
+    'ResetPasswordRequestToken',
+    'reset_password_confirm',
+    'reset_password_request_token'
+]
+
 
 class ResetPasswordConfirm(GenericAPIView):
     """
@@ -52,7 +59,11 @@ class ResetPasswordConfirm(GenericAPIView):
         if reset_password_token.user.has_usable_password():
             pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
             try:
-                validate_password(password, user=reset_password_token.user, password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS))
+                validate_password(
+                    password,
+                    user=reset_password_token.user,
+                    password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
+                )
             except ValidationError as e:
                 raise serializers.ValidationError(e.messages)
 
