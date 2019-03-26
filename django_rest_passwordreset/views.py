@@ -5,8 +5,7 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
-from rest_framework import status, serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework import status, serializers, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -59,13 +58,17 @@ class ResetPasswordConfirm(GenericAPIView):
         if reset_password_token.user.has_usable_password():
             pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
             try:
+                # validate the password against existing validators
                 validate_password(
                     password,
                     user=reset_password_token.user,
                     password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
                 )
             except ValidationError as e:
-                raise serializers.ValidationError(e.messages)
+                # raise a validation error for the serializer
+                raise exceptions.ValidationError({
+                    'password': e.messages
+                })
 
             reset_password_token.user.set_password(password)
             reset_password_token.user.save()
@@ -115,7 +118,7 @@ class ResetPasswordRequestToken(GenericAPIView):
 
         # No active user found, raise a validation error
         if not active_user_found:
-            raise ValidationError({
+            raise exceptions.ValidationError({
                 'email': [_(
                     "There is no active user associated with this e-mail address or the password can not be changed")],
             })
