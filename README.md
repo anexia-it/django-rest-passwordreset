@@ -67,7 +67,7 @@ The following settings can be set in Djangos ``settings.py`` file:
  
 ### Signals
 
-* ``reset_password_token_created(reset_password_token)`` Fired when a reset password token is generated
+* ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
 * ``pre_password_reset(user)`` - fired just before a password is being reset
 * ``post_password_reset(user)`` - fired after a password has been reset
 
@@ -84,12 +84,13 @@ from django.urls import reverse
 
 
 @receiver(reset_password_token_created)
-def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
+def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
     """
     Handles password reset tokens
     When a token is created, an e-mail needs to be sent to the user
-    :param sender:
-    :param reset_password_token:
+    :param sender: View Class that sent the signal
+    :param instance: View Instance that sent the signal
+    :param reset_password_token: Token Model Object
     :param args:
     :param kwargs:
     :return:
