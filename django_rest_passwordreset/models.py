@@ -18,6 +18,7 @@ TOKEN_GENERATOR_CLASS = get_token_generator()
 __all__ = [
     'ResetPasswordToken',
     'get_password_reset_token_expiry_time',
+    'get_password_reset_lookup_field',
     'clear_expired',
 ]
 
@@ -84,6 +85,15 @@ def get_password_reset_token_expiry_time():
     """
     # get token validation time
     return getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME', 24)
+
+
+def get_password_reset_lookup_field():
+    """
+    Returns the password reset lookup field (default: email)
+    Set Django SETTINGS.DJANGO_REST_LOOKUP_FIELD to overwrite this time
+    :return: lookup field
+    """
+    return getattr(settings, 'DJANGO_REST_LOOKUP_FIELD', 'email')
 
 
 def clear_expired(expiry_time):
