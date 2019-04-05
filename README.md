@@ -126,6 +126,15 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
 
 
+## Custom Email Lookup
+
+By default, `email` lookup is used to find the user instance. You can change that by adding 
+```python
+DJANGO_REST_LOOKUP_FIELD = ''
+```
+into Django settings.py file.
+
+
 ## Custom Token Generator
 
 By default, a random string token of length 10 to 50 is generated using the ``RandomStringTokenGenerator`` class.
