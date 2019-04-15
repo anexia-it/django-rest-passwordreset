@@ -78,9 +78,12 @@ Within the templates, you can access the following context variables: `current_u
 
 2. Add the following code, which contains a Django Signal, to your application (see [this part of the django documentation](https://docs.djangoproject.com/en/1.11/topics/signals/#connecting-receiver-functions) for more information on where to put signals).
 ```python
+from django.core.mail import EmailMultiAlternatives
 from django.dispatch import receiver
-from django_rest_passwordreset.signals import reset_password_token_created
+from django.template.loader import render_to_string
 from django.urls import reverse
+
+from django_rest_passwordreset.signals import reset_password_token_created
 
 
 @receiver(reset_password_token_created)
