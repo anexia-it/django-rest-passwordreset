@@ -10,7 +10,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
-from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time
+from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
+    get_password_reset_lookup_field
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
 
 User = get_user_model()
@@ -105,7 +106,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         clear_expired(now_minus_expiry_time)
 
         # find a user by email address (case insensitive search)
-        users = User.objects.filter(email__iexact=email)
+        users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
 
         active_user_found = False
 
