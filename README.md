@@ -76,7 +76,7 @@ The following settings can be set in Djangos ``settings.py`` file:
 1. Create two new django templates: `email/user_reset_password.html` and `email/user_reset_password.txt`. Those templates will contain the e-mail message sent to the user, aswell as the password reset link (or token).
 Within the templates, you can access the following context variables: `current_user`, `username`, `email`, `reset_password_url`. Feel free to adapt this to your needs.
 
-2. Add the following code, which contains a Django Signal, to your application (see [this part of the django documentation](https://docs.djangoproject.com/en/1.11/topics/signals/#connecting-receiver-functions) for more information on where to put signals).
+2. Add the following code, which contains a Django Signal Receiver (`@receiver(...)`), to your application. Take care where to put this code, as it needs to be executed by the python interpreter (see the section *The `reset_password_token_created` signal is not fired* below, aswell as [this part of the django documentation](https://docs.djangoproject.com/en/1.11/topics/signals/#connecting-receiver-functions) and [How to Create Django Signals Tutorial](https://simpleisbetterthancomplex.com/tutorial/2016/07/28/how-to-create-django-signals.html) for more information).
 ```python
 from django.core.mail import EmailMultiAlternatives
 from django.dispatch import receiver
@@ -233,7 +233,7 @@ a matrix showing the guaranteed and tested compatibility.
 django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions
 --------------------------------- | ----------------| ------------------------------
 0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9
-1.0 (WIP) | 1.11, 2.0, 2.2 | 3.6 - 3.9
+1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9
 
 ## Documentation / Browsable API
 
@@ -246,12 +246,51 @@ This package supports the [DRF auto-generated documentation](https://www.django-
 ![coreapi_docs](docs/coreapi_docs.png "Core API Docs")
 
 
-## Known Issues
+## Known Issues / FAQ
 
 ### Django 2.1 Migrations - Multiple Primary keys for table ...
 Django 2.1 introduced a breaking change for migrations (see [Django Issue #29790](https://code.djangoproject.com/ticket/29790)). We therefore had to rewrite the migration [0002_pk_migration.py](django_rest_passwordreset/migrations/0002_pk_migration.py) such that it covers Django versions before (`<`) 2.1 and later (`>=`) 2.1.
 
 Some information is written down in Issue #8.
+
+### The `reset_password_token_created` signal is not fired
+You need to make sure that the code with `@receiver(reset_password_token_created)` is executed by the python interpreter. To ensure this, you have two options:
+
+1. Put the code at a place that is automatically loaded by Django (e.g., models.py, views.py), or
+
+2. Import the file that contains the signal within your app.py `ready` function:
+
+  *some_app/signals.py*
+  ```python
+  from django.core.mail import EmailMultiAlternatives
+  from django.dispatch import receiver
+  from django.template.loader import render_to_string
+  from django.urls import reverse
+
+  from django_rest_passwordreset.signals import reset_password_token_created
+
+
+  @receiver(reset_password_token_created)
+  def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
+      # ...
+  ```
+  
+  *some_app/app.py*
+  ```python
+  from django.apps import AppConfig
+
+  class SomeAppConfig(AppConfig):
+      name = 'your_django_project.some_app'
+      verbose_name = 'Some App'
+
+      def ready(self):
+          import your_django_project.some_app.signals  # noqa
+  ```
+  
+  *some_app/__init__.py*
+  ```python
+  default_app_config = 'your_django_project.some_app.SomeAppConfig'
+  ```
 
 ## Contributions
 
