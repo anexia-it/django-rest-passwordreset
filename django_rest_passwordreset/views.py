@@ -9,9 +9,9 @@ from rest_framework import status, serializers, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
+from django_rest_passwordreset.serializers import EmailSerializer, UsernameSerializer, PasswordTokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
-    get_password_reset_lookup_field
+    get_password_reset_lookup_field, get_password_reset_lookup_serializer
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
 
 User = get_user_model()
@@ -89,12 +89,17 @@ class ResetPasswordRequestToken(GenericAPIView):
     """
     throttle_classes = ()
     permission_classes = ()
-    serializer_class = EmailSerializer
+
+    def get_serializer_class(self):
+        return get_password_reset_lookup_serializer()
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
+
+        # Can this be a different name?
+        email = serializer.validated_data[get_password_reset_lookup_field()]
 
         # before we continue, delete all existing expired tokens
         password_reset_token_validation_time = get_password_reset_token_expiry_time()

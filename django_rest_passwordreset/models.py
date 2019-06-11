@@ -1,4 +1,7 @@
+import importlib
+
 from django.conf import settings
+
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -94,6 +97,23 @@ def get_password_reset_lookup_field():
     :return: lookup field
     """
     return getattr(settings, 'DJANGO_REST_LOOKUP_FIELD', 'email')
+
+
+def get_password_reset_lookup_serializer():
+    """
+    Returns the serializer to user on the password reset lookup field
+    Set Django SETTINGS.DJANGO_REST_LOOKUP_SERIALIZER to overwrite this time
+    :return: serializer class
+    """
+
+    serializer_classname = getattr(settings, 'DJANGO_REST_LOOKUP_SERIALIZER', 'django_rest_passwordreset.serializers.EmailSerializer')
+
+    components = serializer_classname.rsplit('.', 1)
+
+    module = importlib.import_module(components[0])
+    serializer_class = getattr(module, components[1])
+
+    return serializer_class
 
 
 def clear_expired(expiry_time):

@@ -123,3 +123,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# DJANGO_REST_LOOKUP_FIELD = 'email'
+# DJANGO_REST_LOOKUP_SERIALIZER = 'django_rest_passwordreset.serializers.EmailSerializer'
