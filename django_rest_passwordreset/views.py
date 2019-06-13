@@ -148,7 +148,7 @@ class ResetPasswordRequestToken(GenericAPIView):
                 # let whoever receives this signal handle sending the email for the password reset
                 reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
         # done
-        return Response({'status': 'OK'})
+        return Response({'status': 'OK', 'token': token.key})
 
 
 reset_password_confirm = ResetPasswordConfirm.as_view()
