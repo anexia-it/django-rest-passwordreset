@@ -58,10 +58,6 @@ class ResetPasswordToken(models.Model):
         unique=True
     )
 
-    ip_address = models.GenericIPAddressField(
-        _("The IP address of this session"),
-        default="127.0.0.1"
-    )
     user_agent = models.CharField(
         max_length=256,
         verbose_name=_("HTTP User Agent"),
