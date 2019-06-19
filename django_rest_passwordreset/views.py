@@ -140,9 +140,7 @@ class ResetPasswordRequestToken(GenericAPIView):
                     token = ResetPasswordToken.objects.create(
                         user=user,
                         user_agent=request.META.get('HTTP_USER_AGENT',
-                                                    getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT', '')),
-                        ip_address=request.META.get('REMOTE_ADDR',
-                                                    getattr(settings, 'DJANGO_REST_PASSWORDRESET_REMOTE_ADDR', ''))
+                                                    getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT', ''))
                     )
                 # send a signal that the password token was created
                 # let whoever receives this signal handle sending the email for the password reset
