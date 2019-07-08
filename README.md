@@ -168,7 +168,7 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator",
     "OPTIONS": {
         "min_length": 20,
-        "max_lenght": 30
+        "max_length": 30
     }
 }
 ```
