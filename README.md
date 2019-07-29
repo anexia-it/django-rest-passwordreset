@@ -68,6 +68,9 @@ The following settings can be set in Djangos ``settings.py`` file:
 * `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - will cause a 200 to be returned on `POST ${API_URL}/reset_password/`
   even if the user doesn't exist in the databse (Default: False) 
 
+* `DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD` - allows password reset for a user that does not 
+  [have a usable password](https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.has_usable_password) (Default: True)
+ 
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated

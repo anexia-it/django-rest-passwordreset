@@ -55,8 +55,8 @@ class ResetPasswordConfirm(GenericAPIView):
             reset_password_token.delete()
             return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
 
-        # change users password
-        if reset_password_token.user.has_usable_password():
+        # change users password (if we got to this code it means that the user is_active)
+        if reset_password_token.user.eligible_for_reset():
             pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
             try:
                 # validate the password against existing validators
@@ -114,7 +114,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         # also check whether the password can be changed (is useable), as there could be users that are not allowed
         # to change their password (e.g., LDAP user)
         for user in users:
-            if user.is_active and user.has_usable_password():
+            if user.eligible_for_reset():
                 active_user_found = True
 
         # No active user found, raise a validation error
@@ -132,7 +132,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         # last but not least: iterate over all users that are active and can change their password
         # and create a Reset Password Token and send a signal with the created token
         for user in users:
-            if user.is_active and user.has_usable_password():
+            if user.eligible_for_reset():
                 # define the token as none for now
                 token = None
 
