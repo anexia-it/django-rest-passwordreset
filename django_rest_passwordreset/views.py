@@ -118,16 +118,12 @@ class ResetPasswordRequestToken(GenericAPIView):
                 active_user_found = True
 
         # No active user found, raise a validation error
-        if not active_user_found:
-            # if we dont want it to be known whether or not the email account
-            # exists in the db then we just return 200
-            if getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
-                return Response({'status': 'OK'})
-            else: 
-                raise exceptions.ValidationError({
-                    'email': [_(
-                        "There is no active user associated with this e-mail address or the password can not be changed")],
-                })
+        # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
+        if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
+            raise exceptions.ValidationError({
+                'email': [_(
+                    "There is no active user associated with this e-mail address or the password can not be changed")],
+            })
 
         # last but not least: iterate over all users that are active and can change their password
         # and create a Reset Password Token and send a signal with the created token
