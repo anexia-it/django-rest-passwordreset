@@ -34,7 +34,12 @@ INSTALLED_APPS = (
 )
 ```
 
-3. This package provides two endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
+3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefor you have to run django migrations:
+```bash
+python manage.py migrate
+```
+
+4. This package provides two endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
 from django.conf.urls import url, include
 
