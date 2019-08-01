@@ -41,7 +41,7 @@ class TokenGeneratorTestCase(TestCase):
             )
 
     def test_number_token_generator(self):
-        token_generator = RandomNumberTokenGenerator(min_number=100000, max_number=999999)
+        token_generator = RandomNumberTokenGenerator(min_number=1000000000, max_number=9999999999)
 
         tokens = []
 
@@ -72,10 +72,8 @@ class TokenGeneratorTestCase(TestCase):
             self.assertEquals(is_number, True, msg="RandomNumberTokenGenerator must return a number, but returned "
                                                    + token)
 
-            self.assertGreaterEqual(num, 100000, msg="RandomNumberTokenGenerator must return a number greater or "
-                                                     "equal to 1000")
-
-            self.assertLess(num, 999999, msg="RandomNumberTokenGenerator must return a number less or equal to 9999")
+            self.assertGreaterEqual(num, 1000000000, msg="RandomNumberTokenGenerator must return a number greater or equal to 1000000000")
+            self.assertLess(num, 9999999999, msg="RandomNumberTokenGenerator must return a number less or equal to 9999999999")
 
     def test_generate_token_generator_from_empty_settings(self):
         """

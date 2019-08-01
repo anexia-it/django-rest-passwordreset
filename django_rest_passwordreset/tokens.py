@@ -71,12 +71,14 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 
 class RandomNumberTokenGenerator(BaseTokenGenerator):
     """
-    Generates a random number
+    Generates a random number using random.SystemRandom() (which uses urandom in the background)
     """
     def __init__(self, min_number=10000, max_number=99999, *args, **kwargs):
         self.min_number = min_number
         self.max_number = max_number
 
     def generate_token(self, *args, **kwargs):
+        r = random.SystemRandom()
+
         # generate a random number between min_number and max_number
-        return str(random.randint(self.min_number, self.max_number))
+        return str(r.randint(self.min_number, self.max_number))

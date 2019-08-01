@@ -144,7 +144,7 @@ If you want to test this locally, I recommend using some kind of fake mailserver
 
 By default, `email` lookup is used to find the user instance. You can change that by adding 
 ```python
-DJANGO_REST_LOOKUP_FIELD = ''
+DJANGO_REST_LOOKUP_FIELD = 'custom_email_field'
 ```
 into Django settings.py file.
 
@@ -183,6 +183,8 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     }
 }
 ```
+
+It uses `os.urandom()` to generate a good random string.
    
 
 ### RandomNumberTokenGenerator
@@ -202,6 +204,8 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     }
 }
 ```
+
+It uses `random.SystemRandom().randint()` to generate a good random number.
 
 
 ### Write your own Token Generator
