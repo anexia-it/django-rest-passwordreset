@@ -28,6 +28,99 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.assertTrue("email" in decoded_response)
 
     @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    @override_settings(DJANGO_REST_PASSWORDRESET_ALLOW_TOKEN_VALIDATION=True)
+    def test_check_token_validity(self, mock_reset_password_token_created):
+        """ Tests validate token """
+
+        # there should be zero tokens
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
+
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # check that the signal was sent once
+        self.assertTrue(mock_reset_password_token_created.called)
+        self.assertEqual(mock_reset_password_token_created.call_count, 1)
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # if the same user tries to reset again, the user will get the same token again
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(mock_reset_password_token_created.call_count, 2)
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+        # and it should be assigned to user1
+        self.assertEqual(
+            ResetPasswordToken.objects.filter(key=last_reset_password_token.key).first().user.username,
+            "user1"
+        )
+
+        # try to validate token
+        response = self.rest_do_check_token_valid(last_reset_password_token.key)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # try to login with the old username/password (should work)
+        self.assertTrue(
+            self.django_check_login("user1", "secret1"),
+            msg="User 1 should still be able to login with the old credentials"
+        )
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    def test_no_token_validation_by_default(self, mock_reset_password_token_created):
+        """ Tests that ResetPasswordConfirm view requires a password by default """
+
+        # there should be zero tokens
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
+
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # check that the signal was sent once
+        self.assertTrue(mock_reset_password_token_created.called)
+        self.assertEqual(mock_reset_password_token_created.call_count, 1)
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # if the same user tries to reset again, the user will get the same token again
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(mock_reset_password_token_created.call_count, 2)
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+        # and it should be assigned to user1
+        self.assertEqual(
+            ResetPasswordToken.objects.filter(key=last_reset_password_token.key).first().user.username,
+            "user1"
+        )
+
+        # try to validate token (should fail)
+        response = self.rest_do_check_token_valid(last_reset_password_token.key)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # try to login with the old username/password (should work)
+        self.assertTrue(
+            self.django_check_login("user1", "secret1"),
+            msg="User 1 should still be able to login with the old credentials"
+        )
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
     def test_reset_password(self, mock_reset_password_token_created):
         """ Tests resetting a password """
 

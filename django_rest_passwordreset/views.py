@@ -33,9 +33,9 @@ class ResetPasswordConfirm(GenericAPIView):
     serializer_class = PasswordTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, password_optional=getattr(settings, 'DJANGO_REST_PASSWORDRESET_ALLOW_TOKEN_VALIDATION', False))
         serializer.is_valid(raise_exception=True)
-        password = serializer.validated_data['password']
+        password = serializer.validated_data.get('password')
         token = serializer.validated_data['token']
 
         # get token validation time
@@ -54,6 +54,9 @@ class ResetPasswordConfirm(GenericAPIView):
             # delete expired token
             reset_password_token.delete()
             return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
+
+        if password is None:
+            return Response({'status': 'OK'})
 
         # change users password (if we got to this code it means that the user is_active)
         if reset_password_token.user.eligible_for_reset():

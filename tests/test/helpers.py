@@ -69,3 +69,17 @@ class HelperMixin:
             HTTP_USER_AGENT=HTTP_USER_AGENT,
             REMOTE_ADDR=REMOTE_ADDR
         )
+
+    def rest_do_check_token_valid(self, token, HTTP_USER_AGENT='', REMOTE_ADDR='127.0.0.1'):
+        """ REST API wrapper for checking token validity """
+        data = {
+            'token': token
+        }
+
+        return self.client.post(
+            self.reset_password_confirm_url,
+            data,
+            format='json',
+            HTTP_USER_AGENT=HTTP_USER_AGENT,
+            REMOTE_ADDR=REMOTE_ADDR
+        )
