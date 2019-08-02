@@ -61,21 +61,6 @@ The following endpoints are provided:
  
 where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
  
-
-### Configuration / Settings
-
-The following settings can be set in Djangos ``settings.py`` file:
-
-* `DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME` - time in hours about how long the token is active (Default: 24)
-
-  **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``.
-
-* `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - will cause a 200 to be returned on `POST ${API_URL}/reset_password/`
-  even if the user doesn't exist in the databse (Default: False) 
-
-* `DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD` - allows password reset for a user that does not 
-  [have a usable password](https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.has_usable_password) (Default: True)
- 
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
@@ -140,6 +125,21 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
 
 
+
+# Configuration / Settings
+
+The following settings can be set in Djangos ``settings.py`` file:
+
+* `DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME` - time in hours about how long the token is active (Default: 24)
+
+  **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``.
+
+* `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - will cause a 200 to be returned on `POST ${API_URL}/reset_password/`
+  even if the user doesn't exist in the databse (Default: False) 
+
+* `DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD` - allows password reset for a user that does not 
+  [have a usable password](https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.has_usable_password) (Default: True)
+
 ## Custom Email Lookup
 
 By default, `email` lookup is used to find the user instance. You can change that by adding 
@@ -148,6 +148,19 @@ DJANGO_REST_LOOKUP_FIELD = 'custom_email_field'
 ```
 into Django settings.py file.
 
+## Custom Remote IP Address and User Agent Header Lookup
+
+If your setup demands that the IP adress of the user is in another header (e.g., 'X-Forwarded-For'), you can configure that (using Django Request Headers):
+
+```python
+DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER = 'HTTP_X_FORWARDED_FOR'
+```
+
+The same is true for the user agent:
+
+```python
+HTTP_USER_AGENT_HEADER = 'HTTP_USER_AGENT'
+```
 
 ## Custom Token Generator
 
@@ -249,6 +262,7 @@ django-rest-passwordreset Version | Django Versions | Django Rest Framework Vers
 --------------------------------- | ----------------| ------------------------------
 0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9
 1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9
+1.1 | 1.11, 2.2 | 3.6 - 3.9
 
 ## Documentation / Browsable API
 
@@ -306,6 +320,18 @@ You need to make sure that the code with `@receiver(reset_password_token_created
   ```python
   default_app_config = 'your_django_project.some_app.SomeAppConfig'
   ```
+
+### MongoDB not working
+
+Apparently, the following piece of code in the Django Model prevents MongodB from working:
+
+```python
+ id = models.AutoField( 
+     primary_key=True 
+ ) 
+```
+
+See issue #49 for details.
 
 ## Contributions
 
