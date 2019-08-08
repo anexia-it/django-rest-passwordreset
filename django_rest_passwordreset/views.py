@@ -9,7 +9,7 @@ from rest_framework import status, serializers, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
+from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, TokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
     get_password_reset_lookup_field
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
@@ -17,14 +17,49 @@ from django_rest_passwordreset.signals import reset_password_token_created, pre_
 User = get_user_model()
 
 __all__ = [
+    'ValidateToken',
     'ResetPasswordConfirm',
     'ResetPasswordRequestToken',
+    'reset_password_validate_token',
     'reset_password_confirm',
     'reset_password_request_token'
 ]
 
 HTTP_USER_AGENT_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER', 'HTTP_USER_AGENT')
 HTTP_IP_ADDRESS_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER', 'REMOTE_ADDR')
+
+
+class ResetPasswordValidateToken(GenericAPIView):
+    """
+    An Api View which provides a method to verify that a token is valid
+    """
+    throttle_classes = ()
+    permission_classes = ()
+    serializer_class = TokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data['token']
+
+        # get token validation time
+        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+
+        # find token
+        reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
+
+        if reset_password_token is None:
+            return Response({'status': 'notfound'}, status=status.HTTP_404_NOT_FOUND)
+
+        # check expiry date
+        expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
+
+        if timezone.now() > expiry_date:
+            # delete expired token
+            reset_password_token.delete()
+            return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({'status': 'OK'})
 
 
 class ResetPasswordConfirm(GenericAPIView):
@@ -153,5 +188,6 @@ class ResetPasswordRequestToken(GenericAPIView):
         return Response({'status': 'OK'})
 
 
+reset_password_validate_token = ResetPasswordValidateToken.as_view()
 reset_password_confirm = ResetPasswordConfirm.as_view()
 reset_password_request_token = ResetPasswordRequestToken.as_view()

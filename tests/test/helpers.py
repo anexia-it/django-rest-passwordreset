@@ -29,6 +29,7 @@ class HelperMixin:
         """ set up urls by using djangos reverse function """
         self.reset_password_request_url = reverse('password_reset:reset-password-request')
         self.reset_password_confirm_url = reverse('password_reset:reset-password-confirm')
+        self.reset_password_validate_token_url = reverse('password_reset:reset-password-validate')
 
     def django_check_login(self, username, password):
         """
@@ -64,6 +65,20 @@ class HelperMixin:
 
         return self.client.post(
             self.reset_password_confirm_url,
+            data,
+            format='json',
+            HTTP_USER_AGENT=HTTP_USER_AGENT,
+            REMOTE_ADDR=REMOTE_ADDR
+        )
+
+    def rest_do_validate_token(self, token, HTTP_USER_AGENT='', REMOTE_ADDR='127.0.0.1'):
+        """ REST API wrapper for validating a token """
+        data = {
+            'token': token
+        }
+
+        return self.client.post(
+            self.reset_password_validate_token_url,
             data,
             format='json',
             HTTP_USER_AGENT=HTTP_USER_AGENT,
