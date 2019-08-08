@@ -23,6 +23,9 @@ __all__ = [
     'reset_password_request_token'
 ]
 
+HTTP_USER_AGENT_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER', 'HTTP_USER_AGENT')
+HTTP_IP_ADDRESS_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER', 'REMOTE_ADDR')
+
 
 class ResetPasswordConfirm(GenericAPIView):
     """
@@ -140,10 +143,8 @@ class ResetPasswordRequestToken(GenericAPIView):
                     # no token exists, generate a new token
                     token = ResetPasswordToken.objects.create(
                         user=user,
-                        user_agent=request.META.get('HTTP_USER_AGENT',
-                                                    getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT', '')),
-                        ip_address=request.META.get('REMOTE_ADDR',
-                                                    getattr(settings, 'DJANGO_REST_PASSWORDRESET_REMOTE_ADDR', ''))
+                        user_agent=request.META.get(HTTP_USER_AGENT_HEADER, ''),
+                        ip_address=request.META.get(HTTP_IP_ADDRESS_HEADER, ''),
                     )
                 # send a signal that the password token was created
                 # let whoever receives this signal handle sending the email for the password reset
