@@ -350,3 +350,13 @@ python setup.py install
 cd tests
 python manage.py test
 ```
+
+## Release on PyPi
+
+To release this package on pypi, the following steps are used:
+
+```bash
+rm -rf dist/ build/
+python setup.py sdist
+twine upload dist/*
+```
