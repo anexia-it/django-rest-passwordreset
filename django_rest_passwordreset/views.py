@@ -50,7 +50,7 @@ class ResetPasswordValidateToken(GenericAPIView):
 
         if reset_password_token is None:
             message = get_response_message("TOKEN_NOT_FOUND")
-            response_dict.update({"status_code": 404, "message": message})
+            response_dict.update({"status_code": 404, "status": "notfound", "message": message})
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
         # check expiry date
@@ -60,11 +60,11 @@ class ResetPasswordValidateToken(GenericAPIView):
             # delete expired token
             reset_password_token.delete()
             message = get_response_message("TOEKN_EXPIRED")
-            response_dict.update({"status_code": 401, "message": message})
+            response_dict.update({"status_code": 401, 'status': 'expired', "message": message})
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
         message = get_response_message("TOKEN_VALID")
-        response_dict.update({"status_code": 200, "message": message})
+        response_dict.update({"status_code": 200, 'status': 'OK', "message": message})
         return Response(response_dict)
 
 
@@ -81,7 +81,7 @@ class ResetPasswordConfirm(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data['password']
         token = serializer.validated_data['token']
-        response_dict = dict({"status_code": None, "message": None})
+        response_dict = dict({"status_code": None, "message": None, "status": None})
 
         # get token validation time
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
@@ -91,7 +91,7 @@ class ResetPasswordConfirm(GenericAPIView):
 
         if reset_password_token is None:
             message = get_response_message("TOKEN_NOT_FOUND")
-            response_dict.update({"status_code": 404, "message": message})
+            response_dict.update({"status_code": 404, 'status': 'notfound', "message": message})
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
         # check expiry date
@@ -101,7 +101,7 @@ class ResetPasswordConfirm(GenericAPIView):
             # delete expired token
             reset_password_token.delete()
             message = get_response_message("TOEKN_EXPIRED")
-            response_dict.update({"status_code": 401, "message": message})
+            response_dict.update({"status_code": 404, 'status': 'expired', "message": message})
 
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
@@ -130,7 +130,7 @@ class ResetPasswordConfirm(GenericAPIView):
 
         # done
         message = get_response_message("PASSWORD_CHANGED")
-        response_dict.update({"status_code": 200, "message": message})
+        response_dict.update({"status_code": 200, "status": "OK", "message": message})
 
         return Response(response_dict)
 
@@ -203,7 +203,7 @@ class ResetPasswordRequestToken(GenericAPIView):
                 reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
         # done
         message = get_response_message("PASSWORD_REQUEST_ACCEPT")
-        return Response({"status_code": 200, "message": message})
+        return Response({"status_code": 200, "status": "OK", "message": message})
 
 
 def get_response_message(message_key):

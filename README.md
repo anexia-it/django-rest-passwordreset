@@ -334,6 +334,18 @@ Apparently, the following piece of code in the Django Model prevents MongodB fro
 
 See issue #49 for details.
 
+### cofigurable Response 
+
+To cofigurable response messages need to add following properties into settings.py
+
+```python
+PASSWORD_CHANGED = 'Your password change message' 
+TOKEN_EXPIRED = 'Your token expired'
+PASSWORD_REQUEST_ACCEPT = 'Your password valid request message'
+TOKEN_NOT_FOUND = 'Your token not found message'
+TOKEN_VALID = 'Your token valid message'
+```
+
 ## Contributions
 
 This library tries to follow the unix philosophy of "do one thing and do it well" (which is providing a basic password reset endpoint for Django Rest Framework). Contributions are welcome in the form of pull requests and issues! If you create a pull request, please make sure that you are not introducing breaking changes. 
