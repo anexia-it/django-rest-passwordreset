@@ -41,7 +41,7 @@ class ResetPasswordValidateToken(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         token = serializer.validated_data['token']
-
+        response_dict = dict({"status_code": None, "message": None})
         # get token validation time
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
 
@@ -49,7 +49,9 @@ class ResetPasswordValidateToken(GenericAPIView):
         reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
 
         if reset_password_token is None:
-            return Response({'status': 'notfound'}, status=status.HTTP_404_NOT_FOUND)
+            message = get_response_message("TOKEN_NOT_FOUND")
+            response_dict.update({"status_code": 404, "message": message})
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
         # check expiry date
         expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
@@ -57,9 +59,13 @@ class ResetPasswordValidateToken(GenericAPIView):
         if timezone.now() > expiry_date:
             # delete expired token
             reset_password_token.delete()
-            return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
-        
-        return Response({'status': 'OK'})
+            message = get_response_message("TOEKN_EXPIRED")
+            response_dict.update({"status_code": 401, "message": message})
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
+
+        message = get_response_message("TOKEN_VALID")
+        response_dict.update({"status_code": 200, "message": message})
+        return Response(response_dict)
 
 
 class ResetPasswordConfirm(GenericAPIView):
@@ -75,6 +81,7 @@ class ResetPasswordConfirm(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data['password']
         token = serializer.validated_data['token']
+        response_dict = dict({"status_code": None, "message": None})
 
         # get token validation time
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
@@ -83,7 +90,9 @@ class ResetPasswordConfirm(GenericAPIView):
         reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
 
         if reset_password_token is None:
-            return Response({'status': 'notfound'}, status=status.HTTP_404_NOT_FOUND)
+            message = get_response_message("TOKEN_NOT_FOUND")
+            response_dict.update({"status_code": 404, "message": message})
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
         # check expiry date
         expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
@@ -91,7 +100,10 @@ class ResetPasswordConfirm(GenericAPIView):
         if timezone.now() > expiry_date:
             # delete expired token
             reset_password_token.delete()
-            return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
+            message = get_response_message("TOEKN_EXPIRED")
+            response_dict.update({"status_code": 401, "message": message})
+
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
         # change users password (if we got to this code it means that the user is_active)
         if reset_password_token.user.eligible_for_reset():
@@ -116,7 +128,11 @@ class ResetPasswordConfirm(GenericAPIView):
         # Delete all password reset tokens for this user
         ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()
 
-        return Response({'status': 'OK'})
+        # done
+        message = get_response_message("PASSWORD_CHANGED")
+        response_dict.update({"status_code": 200, "message": message})
+
+        return Response(response_dict)
 
 
 class ResetPasswordRequestToken(GenericAPIView):
@@ -159,6 +175,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
         if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
             raise exceptions.ValidationError({
+
                 'email': [_(
                     "There is no active user associated with this e-mail address or the password can not be changed")],
             })
@@ -185,7 +202,22 @@ class ResetPasswordRequestToken(GenericAPIView):
                 # let whoever receives this signal handle sending the email for the password reset
                 reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
         # done
-        return Response({'status': 'OK'})
+        message = get_response_message("PASSWORD_REQUEST_ACCEPT")
+        return Response({"status_code": 200, "message": message})
+
+
+def get_response_message(message_key):
+    """
+        A function return status message based on conditions
+        conditions: if message attribute define in settings then it will 
+                    return user define message otherwise, return static defined message
+        params: message_key
+        return: status_message
+    """
+
+    status_message = getattr(settings, message_key, message_key)
+
+    return status_message
 
 
 reset_password_validate_token = ResetPasswordValidateToken.as_view()
