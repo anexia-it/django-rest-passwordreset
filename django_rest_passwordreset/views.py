@@ -59,7 +59,7 @@ class ResetPasswordValidateToken(GenericAPIView):
         if timezone.now() > expiry_date:
             # delete expired token
             reset_password_token.delete()
-            message = get_response_message("TOEKN_EXPIRED")
+            message = get_response_message("TOKEN_EXPIRED")
             response_dict.update({"status_code": 401, 'status': 'expired', "message": message})
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
 
@@ -100,7 +100,7 @@ class ResetPasswordConfirm(GenericAPIView):
         if timezone.now() > expiry_date:
             # delete expired token
             reset_password_token.delete()
-            message = get_response_message("TOEKN_EXPIRED")
+            message = get_response_message("TOKEN_EXPIRED")
             response_dict.update({"status_code": 404, 'status': 'expired', "message": message})
 
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
