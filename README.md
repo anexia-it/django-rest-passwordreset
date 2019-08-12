@@ -149,9 +149,9 @@ DJANGO_REST_LOOKUP_FIELD = 'custom_email_field'
 ```
 into Django settings.py file.
 
-## Cofigurable Response 
+## Configurable Response
 
-To cofigurable response messages need to add following properties into settings.py
+To configurable response messages need to add following properties into settings.py
 
 ```python
 PASSWORD_CHANGED = 'Your password change message' 
