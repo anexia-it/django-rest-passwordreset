@@ -41,7 +41,7 @@ class ResetPasswordValidateToken(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         token = serializer.validated_data['token']
-        response_dict = dict({"status_code": None, "message": None})
+        response_dict = dict({"status_code": None, "status":None, "message": None})
         # get token validation time
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
 
