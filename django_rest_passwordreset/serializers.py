@@ -5,7 +5,7 @@ from rest_framework import serializers
 __all__ = [
     'EmailSerializer',
     'PasswordTokenSerializer',
-    'TokenSerializer',
+    'ResetTokenSerializer',
 ]
 
 
@@ -18,5 +18,5 @@ class PasswordTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
 
 
-class TokenSerializer(serializers.Serializer):
+class ResetTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
