@@ -1,3 +1,4 @@
 Django==1.11.*
 djangorestframework==3.9.*
+phonenumbers==8.10.*
 mock==2.0.0

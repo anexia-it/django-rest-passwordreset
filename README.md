@@ -3,8 +3,8 @@
 [![PyPI version](https://badge.fury.io/py/django-rest-passwordreset.svg)](https://badge.fury.io/py/django-rest-passwordreset)
 [![Build Status](https://travis-ci.org/anexia-it/django-rest-passwordreset.svg?branch=master)](https://travis-ci.org/anexia-it/django-rest-passwordreset)
 
-This python package provides a simple password reset strategy for django rest framework, where users can request password 
-reset tokens via their registered e-mail address.
+This python package provides a simple password reset strategy for django rest framework, where users can request password
+reset tokens via their registered e-mail address or phone number.
 
 The main idea behind this package is to not make any assumptions about how the token is delivered to the end-user (e-mail, text-message, etc...).
 Instead, this package provides a signal that can be reacted on (e.g., by sending an e-mail or a text message).
@@ -48,7 +48,7 @@ urlpatterns = [
     ...
     url(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     ...
-]    
+]
 ```
 **Note**: You can adapt the url to your needs.
 
@@ -56,12 +56,12 @@ urlpatterns = [
 
 The following endpoints are provided:
 
- * `POST ${API_URL}/reset_password/` - request a reset password token by using the ``email`` parameter
+ * `POST ${API_URL}/reset_password/` - request a reset password token by using the ``email`` or ``phone number`` parameter
  * `POST ${API_URL}/reset_password/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
  * `POST ${API_URL}/reset_password/validate_token/` - will return a 200 if a given ``token`` is valid
- 
+
 where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
- 
+
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
@@ -122,7 +122,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
 ```
 
-3. You should now be able to use the endpoints to request a password reset token via your e-mail address. 
+3. You should now be able to use the endpoints to request a password reset token via your e-mail address.
 If you want to test this locally, I recommend using some kind of fake mailserver (such as maildump).
 
 
@@ -136,16 +136,17 @@ The following settings can be set in Djangos ``settings.py`` file:
   **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``.
 
 * `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - will cause a 200 to be returned on `POST ${API_URL}/reset_password/`
-  even if the user doesn't exist in the databse (Default: False) 
+  even if the user doesn't exist in the databse (Default: False)
 
-* `DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD` - allows password reset for a user that does not 
+* `DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD` - allows password reset for a user that does not
   [have a usable password](https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.has_usable_password) (Default: True)
 
 ## Custom Email Lookup
 
-By default, `email` lookup is used to find the user instance. You can change that by adding 
+By default, `email` lookup is used to find the user instance by email, and ``profile__telephone`` is used to find user instance by phone number You can change that by adding
 ```python
 DJANGO_REST_LOOKUP_FIELD = 'custom_email_field'
+DJANGO_REST_PHONE_LOOKUP_FIELD = 'custom_phone_field'
 ```
 into Django settings.py file.
 
@@ -169,7 +170,7 @@ By default, a random string token of length 10 to 50 is generated using the ``Ra
 This library offers a possibility to configure the params of ``RandomStringTokenGenerator`` as well as switch to
 another token generator, e.g. ``RandomNumberTokenGenerator``. You can also generate your own token generator class.
 
-You can change that by adding 
+You can change that by adding
 ```python
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": ...,
@@ -180,7 +181,7 @@ into Django settings.py file.
 
 
 ### RandomStringTokenGenerator
-This is the default configuration. 
+This is the default configuration.
 ```python
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator"
@@ -199,7 +200,7 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 ```
 
 It uses `os.urandom()` to generate a good random string.
-   
+
 
 ### RandomNumberTokenGenerator
 ```python
@@ -304,7 +305,7 @@ You need to make sure that the code with `@receiver(reset_password_token_created
   def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
       # ...
   ```
-  
+
   *some_app/app.py*
   ```python
   from django.apps import AppConfig
@@ -316,7 +317,7 @@ You need to make sure that the code with `@receiver(reset_password_token_created
       def ready(self):
           import your_django_project.some_app.signals  # noqa
   ```
-  
+
   *some_app/__init__.py*
   ```python
   default_app_config = 'your_django_project.some_app.SomeAppConfig'
@@ -327,16 +328,16 @@ You need to make sure that the code with `@receiver(reset_password_token_created
 Apparently, the following piece of code in the Django Model prevents MongodB from working:
 
 ```python
- id = models.AutoField( 
-     primary_key=True 
- ) 
+ id = models.AutoField(
+     primary_key=True
+ )
 ```
 
 See issue #49 for details.
 
 ## Contributions
 
-This library tries to follow the unix philosophy of "do one thing and do it well" (which is providing a basic password reset endpoint for Django Rest Framework). Contributions are welcome in the form of pull requests and issues! If you create a pull request, please make sure that you are not introducing breaking changes. 
+This library tries to follow the unix philosophy of "do one thing and do it well" (which is providing a basic password reset endpoint for Django Rest Framework). Contributions are welcome in the form of pull requests and issues! If you create a pull request, please make sure that you are not introducing breaking changes.
 
 ## Tests
 

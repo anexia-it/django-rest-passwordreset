@@ -100,6 +100,15 @@ def get_password_reset_lookup_field():
     return getattr(settings, 'DJANGO_REST_LOOKUP_FIELD', 'email')
 
 
+def get_phone_password_reset_lookup_field():
+    """
+    Returns the password reset lookup field (default: email)
+    Set Django SETTINGS.DJANGO_REST_PHONE_LOOKUP_FIELD to overwrite this time
+    :return: lookup field
+    """
+    return getattr(settings, 'DJANGO_REST_PHONE_LOOKUP_FIELD', 'profile__telephone')
+
+
 def clear_expired(expiry_time):
     """
     Remove all expired tokens
@@ -111,7 +120,7 @@ def eligible_for_reset(self):
     if not self.is_active:
         # if the user is active we dont bother checking
         return False
- 
+
     if getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD', True):
         # if we require a usable password then return the result of has_usable_password()
         return self.has_usable_password()
