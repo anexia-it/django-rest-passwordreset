@@ -42,11 +42,15 @@ class HelperMixin:
 
         return user.check_password(password)
 
-    def rest_do_request_reset_token(self, email, HTTP_USER_AGENT='', REMOTE_ADDR='127.0.0.1'):
+    def rest_do_request_reset_token(self, email=None, phone=None, HTTP_USER_AGENT='', REMOTE_ADDR='127.0.0.1'):
         """ REST API wrapper for requesting a password reset token """
         data = {
             'email': email
         }
+        if phone:
+            data = {
+                'phone': phone
+            }
 
         return self.client.post(
             self.reset_password_request_url,
