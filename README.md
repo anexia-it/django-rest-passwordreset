@@ -34,7 +34,7 @@ INSTALLED_APPS = (
 )
 ```
 
-3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefor you have to run django migrations:
+3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefore, you have to run django migrations:
 ```bash
 python manage.py migrate
 ```
