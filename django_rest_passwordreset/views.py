@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password, get_password_validators
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
 from rest_framework import status, serializers, exceptions
@@ -58,7 +58,7 @@ class ResetPasswordValidateToken(GenericAPIView):
             # delete expired token
             reset_password_token.delete()
             return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         return Response({'status': 'OK'})
 
 

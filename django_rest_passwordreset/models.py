@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
 from django_rest_passwordreset.tokens import get_token_generator
@@ -109,7 +109,7 @@ def eligible_for_reset(self):
     if not self.is_active:
         # if the user is active we dont bother checking
         return False
- 
+
     if getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD', True):
         # if we require a usable password then return the result of has_usable_password()
         return self.has_usable_password()
