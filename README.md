@@ -65,8 +65,8 @@ where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
-* ``pre_password_reset(user)`` - fired just before a password is being reset
-* ``post_password_reset(user)`` - fired after a password has been reset
+* ``pre_password_reset(sender, user)`` - fired just before a password is being reset
+* ``post_password_reset(sender, user)`` - fired after a password has been reset
 
 ### Example for sending an e-mail
 
