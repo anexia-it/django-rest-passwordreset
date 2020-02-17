@@ -5,7 +5,7 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
-from rest_framework import status, serializers, exceptions
+from rest_framework import status, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -40,25 +40,6 @@ class ResetPasswordValidateToken(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        token = serializer.validated_data['token']
-
-        # get token validation time
-        password_reset_token_validation_time = get_password_reset_token_expiry_time()
-
-        # find token
-        reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
-
-        if reset_password_token is None:
-            return Response({'status': 'notfound'}, status=status.HTTP_404_NOT_FOUND)
-
-        # check expiry date
-        expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
-
-        if timezone.now() > expiry_date:
-            # delete expired token
-            reset_password_token.delete()
-            return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
-        
         return Response({'status': 'OK'})
 
 
@@ -76,22 +57,8 @@ class ResetPasswordConfirm(GenericAPIView):
         password = serializer.validated_data['password']
         token = serializer.validated_data['token']
 
-        # get token validation time
-        password_reset_token_validation_time = get_password_reset_token_expiry_time()
-
         # find token
         reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
-
-        if reset_password_token is None:
-            return Response({'status': 'notfound'}, status=status.HTTP_404_NOT_FOUND)
-
-        # check expiry date
-        expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
-
-        if timezone.now() > expiry_date:
-            # delete expired token
-            reset_password_token.delete()
-            return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
 
         # change users password (if we got to this code it means that the user is_active)
         if reset_password_token.user.eligible_for_reset():
