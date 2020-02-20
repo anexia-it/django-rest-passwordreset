@@ -127,7 +127,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
             raise exceptions.ValidationError({
                 'email': [_(
-                    "There is no active user associated with this e-mail address or the password can not be changed")],
+                    "We couldn't find an account associate with that email. Please enter another email account.")],
             })
 
         # last but not least: iterate over all users that are active and can change their password
