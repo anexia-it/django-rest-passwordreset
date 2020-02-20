@@ -1,12 +1,13 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.http import Http404
-from django.utils.translation import ugettext_lazy as _
-from django_rest_passwordreset.models import get_password_reset_token_expiry_time
+from django.shortcuts import get_object_or_404 as _get_object_or_404
 from django.utils import timezone
-
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
+
+from django_rest_passwordreset.models import get_password_reset_token_expiry_time
 from . import models
 
 __all__ = [
@@ -28,7 +29,10 @@ class PasswordValidateMixin:
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
 
         # find token
-        reset_password_token = get_object_or_404(models.ResetPasswordToken, key=token)
+        try:
+            reset_password_token = _get_object_or_404(models.ResetPasswordToken, key=token)
+        except (TypeError, ValueError, ValidationError):
+            raise Http404(_("The OTP password entered is not valid. Please check and try again."))
 
         # check expiry date
         expiry_date = reset_password_token.created_at + timedelta(
