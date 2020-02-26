@@ -17,7 +17,7 @@ from django_rest_passwordreset.signals import reset_password_token_created, pre_
 User = get_user_model()
 
 __all__ = [
-    'ValidateToken',
+    'ResetPasswordValidateToken',
     'ResetPasswordConfirm',
     'ResetPasswordRequestToken',
     'reset_password_validate_token',
@@ -58,7 +58,7 @@ class ResetPasswordValidateToken(GenericAPIView):
             # delete expired token
             reset_password_token.delete()
             return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         return Response({'status': 'OK'})
 
 
