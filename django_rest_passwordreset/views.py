@@ -78,7 +78,8 @@ class ResetPasswordConfirm(GenericAPIView):
 
             reset_password_token.user.set_password(password)
             reset_password_token.user.save()
-            post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
+            post_password_reset.send(sender=self.__class__, user=reset_password_token.user, token=reset_password_token,
+                                     request=request)
 
         # Delete all password reset tokens for this user
         ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()
