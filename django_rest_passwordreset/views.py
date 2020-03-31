@@ -139,16 +139,16 @@ class ResetPasswordRequestToken(GenericAPIView):
                 token = None
 
                 # check if the user already has a token
-                if user.password_reset_tokens.all().count() > 0:
-                    # yes, already has a token, re-use this token
-                    token = user.password_reset_tokens.all()[0]
-                else:
+#                 if user.password_reset_tokens.all().count() > 0:
+#                     # yes, already has a token, re-use this token
+#                     token = user.password_reset_tokens.all()[0]
+#                 else:
                     # no token exists, generate a new token
-                    token = ResetPasswordToken.objects.create(
-                        user=user,
-                        user_agent=request.META.get(HTTP_USER_AGENT_HEADER, ''),
-                        ip_address=request.META.get(HTTP_IP_ADDRESS_HEADER, ''),
-                    )
+                token = ResetPasswordToken.objects.create(
+                    user=user,
+                    user_agent=request.META.get(HTTP_USER_AGENT_HEADER, ''),
+                    ip_address=request.META.get(HTTP_IP_ADDRESS_HEADER, ''),
+                )
                 # send a signal that the password token was created
                 # let whoever receives this signal handle sending the email for the password reset
                 reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
