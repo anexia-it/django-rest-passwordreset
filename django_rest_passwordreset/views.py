@@ -144,7 +144,7 @@ class ResetPasswordRequestToken(GenericAPIView):
 #                     token = user.password_reset_tokens.all()[0]
 #                 else:
                     # no token exists, generate a new token
-                token = user.password_reset_tokens.delete()
+                token = user.password_reset_tokens.all().delete()
                 token = ResetPasswordToken.objects.create(
                     user=user,
                     user_agent=request.META.get(HTTP_USER_AGENT_HEADER, ''),
