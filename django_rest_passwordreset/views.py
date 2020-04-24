@@ -9,7 +9,7 @@ from rest_framework import status, serializers, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, TokenSerializer
+from django_rest_passwordreset.serializers import LookupSerializer, PasswordTokenSerializer, TokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
     get_password_reset_lookup_field
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
@@ -58,7 +58,7 @@ class ResetPasswordValidateToken(GenericAPIView):
             # delete expired token
             reset_password_token.delete()
             return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         return Response({'status': 'OK'})
 
 
@@ -127,12 +127,14 @@ class ResetPasswordRequestToken(GenericAPIView):
     """
     throttle_classes = ()
     permission_classes = ()
-    serializer_class = EmailSerializer
+    serializer_class = LookupSerializer
 
     def post(self, request, *args, **kwargs):
+        lookup_field = get_password_reset_lookup_field()
+
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
+        identifier = serializer.validated_data[lookup_field]
 
         # before we continue, delete all existing expired tokens
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
@@ -144,7 +146,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         clear_expired(now_minus_expiry_time)
 
         # find a user by email address (case insensitive search)
-        users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
+        users = User.objects.filter(**{'{}__iexact'.format(lookup_field): identifier})
 
         active_user_found = False
 
@@ -159,8 +161,8 @@ class ResetPasswordRequestToken(GenericAPIView):
         # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
         if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
             raise exceptions.ValidationError({
-                'email': [_(
-                    "There is no active user associated with this e-mail address or the password can not be changed")],
+                lookup_field: [_(
+                    "There is no active user associated with this {} address or the password can not be changed".format(lookup_field))],
             })
 
         # last but not least: iterate over all users that are active and can change their password

@@ -72,7 +72,7 @@ class AuthTestCase(APITestCase, HelperMixin):
         # try to validate an invalid token
         response = self.rest_do_validate_token("not_a_valid_token")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         # there should be zero tokens
         self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
 
@@ -173,7 +173,7 @@ class AuthTestCase(APITestCase, HelperMixin):
         # there should be zero tokens
         self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
 
-        response = self.rest_do_request_reset_token(email="user3@mail.com")
+        response = self.rest_do_request_reset_token(username="user3@mail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # check that the signal was sent once
         self.assertTrue(mock_reset_password_token_created.called)
@@ -185,7 +185,7 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
 
         # if the same user tries to reset again, the user will get the same token again
-        response = self.rest_do_request_reset_token(email="user3@mail.com")
+        response = self.rest_do_request_reset_token(username="user3@mail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(mock_reset_password_token_created.call_count, 2)
         last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
@@ -315,10 +315,10 @@ class AuthTestCase(APITestCase, HelperMixin):
 
     @override_settings(DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE=True)
     def test_try_reset_password_email_does_not_exist_no_leakage_enabled(self):
-        """ 
+        """
         Tests requesting a token for an email that does not exist when
         DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
-        """ 
+        """
         response = self.rest_do_request_reset_token(email="foobar@doesnotexist.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     def test_user_without_password(self):
@@ -372,4 +372,3 @@ class AuthTestCase(APITestCase, HelperMixin):
             self.django_check_login("user4", "new_secret"),
             msg="User 4 should be able to login with the modified credentials"
         )
-
