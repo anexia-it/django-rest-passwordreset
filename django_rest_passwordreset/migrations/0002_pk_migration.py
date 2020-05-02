@@ -77,7 +77,7 @@ def get_migrations_based_on_django_version():
     """
     django_version = django.VERSION
 
-    if django_version[0] >= 2 and django_version[1] >= 1:
+    if (django_version[0] >= 2 and django_version[1] >= 1) or django_version[0] >= 3:
         return get_migrations_for_django_21_and_newer()
 
     return get_migrations_for_django_before_21()

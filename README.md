@@ -1,7 +1,7 @@
 # Django Rest Password Reset
 
 [![PyPI version](https://badge.fury.io/py/django-rest-passwordreset.svg)](https://badge.fury.io/py/django-rest-passwordreset)
-[![Build Status](https://travis-ci.org/anx-ckreuzberger/django-rest-passwordreset.svg?branch=master)](https://travis-ci.org/anx-ckreuzberger/django-rest-passwordreset)
+[![Build Status](https://travis-ci.org/anexia-it/django-rest-passwordreset.svg?branch=master)](https://travis-ci.org/anexia-it/django-rest-passwordreset)
 
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
@@ -34,7 +34,7 @@ INSTALLED_APPS = (
 )
 ```
 
-3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefor you have to run django migrations:
+3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefore, you have to run django migrations:
 ```bash
 python manage.py migrate
 ```
@@ -65,8 +65,8 @@ where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
-* ``pre_password_reset(user)`` - fired just before a password is being reset
-* ``post_password_reset(user)`` - fired after a password has been reset
+* ``pre_password_reset(sender, user)`` - fired just before a password is being reset
+* ``post_password_reset(sender, user)`` - fired after a password has been reset
 
 ### Example for sending an e-mail
 
