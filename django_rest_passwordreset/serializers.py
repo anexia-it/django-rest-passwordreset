@@ -16,6 +16,7 @@ class EmailSerializer(serializers.Serializer):
 class PasswordTokenSerializer(serializers.Serializer):
     password = serializers.CharField(label=_("Password"), style={'input_type': 'password'})
     token = serializers.CharField()
+    register = serializers.BooleanField()
 
 
 class TokenSerializer(serializers.Serializer):

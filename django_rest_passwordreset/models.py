@@ -79,14 +79,17 @@ class ResetPasswordToken(models.Model):
         return "Password reset token for user {user}".format(user=self.user)
 
 
-def get_password_reset_token_expiry_time():
+def get_password_reset_token_expiry_time(register_token=False):
     """
     Returns the password reset token expirty time in hours (default: 24)
     Set Django SETTINGS.DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME to overwrite this time
     :return: expiry time
     """
     # get token validation time
-    return getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME', 24)
+    if register_token:
+        return getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_REGISTER_TOKEN_EXPIRY_TIME', 720)
+    else:
+        return getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME', 24)
 
 
 def get_password_reset_lookup_field():
@@ -105,11 +108,22 @@ def clear_expired(expiry_time):
     """
     ResetPasswordToken.objects.filter(created_at__lte=expiry_time).delete()
 
-def eligible_for_reset(self):
+def clear_user_tokens(user):
+    """
+    Remove all of a user's tokens
+    :param user: User whose tokens should be expired
+    """
+    ResetPasswordToken.objects.filter(user=user).delete()
+    
+def eligible_for_reset(self, register_token=False):
     if not self.is_active:
-        # if the user is active we dont bother checking
+        # if the user is not active we dont bother checking
         return False
- 
+    
+    # if we are checking for the register_token, the user cannot have a usable password.
+    if register_token:
+        return not self.has_usable_password
+
     if getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD', True):
         # if we require a usable password then return the result of has_usable_password()
         return self.has_usable_password()
