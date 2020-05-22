@@ -95,7 +95,7 @@ class ResetPasswordConfirm(GenericAPIView):
             return Response({'status': 'expired'}, status=status.HTTP_404_NOT_FOUND)
 
         # change users password (if we got to this code it means that the user is_active)
-        if reset_password_token.user.eligible_for_reset():
+        if reset_password_token.user.eligible_for_reset(register=register):
             pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
             try:
                 # validate the password against existing validators
