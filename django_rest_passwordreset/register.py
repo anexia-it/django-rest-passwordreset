@@ -5,7 +5,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 
 User = get_user_model()
 
-def create_registration_token(self, user):
+def create_registration_token(user):
     """
     A function which creasts a Registration Token for a new User
 
@@ -25,6 +25,6 @@ def create_registration_token(self, user):
         )
         # send a signal that the password token was created
         # let whoever receives this signal handle sending the email for the password reset
-        reset_password_token_created.send(sender=self, instance=self, reset_password_token=token)
+        reset_password_token_created.send(sender=None, instance=None, reset_password_token=token)
     else:
         raise Exception("User not eligible for reset.")
