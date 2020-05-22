@@ -21,3 +21,4 @@ class PasswordTokenSerializer(serializers.Serializer):
 
 class TokenSerializer(serializers.Serializer):
     token = serializers.CharField()
+    register = serializers.BooleanField()
