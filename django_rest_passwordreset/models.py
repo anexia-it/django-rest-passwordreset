@@ -122,7 +122,7 @@ def eligible_for_reset(self, register_token=False):
     
     # if we are checking for the register_token, the user cannot have a usable password.
     if register_token:
-        return not self.has_usable_password
+        return not self.has_usable_password()
 
     if getattr(settings, 'DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD', True):
         # if we require a usable password then return the result of has_usable_password()
