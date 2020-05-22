@@ -5,7 +5,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 
 User = get_user_model()
 
-def create_registration_token(user):
+def create_registration_token(user_id):
     """
     A function which creasts a Registration Token for a new User
 
@@ -13,7 +13,7 @@ def create_registration_token(user):
     """
 
     # find a user by pk
-    user = User.objects.get(pk=user)
+    user = User.objects.get(pk=user_id)
 
     if user.eligible_for_reset(register_token=True):
         #clear the user's tokens
