@@ -334,6 +334,9 @@ Apparently, the following piece of code in the Django Model prevents MongodB fro
 
 See issue #49 for details.
 
+Fixed here for mongoDB along with autoincrementing pk ID field.
+[ aayushgupta97/django-rest-passwordreset ](https://github.com/aayushgupta97/django-rest-passwordreset) 
+
 ## Contributions
 
 This library tries to follow the unix philosophy of "do one thing and do it well" (which is providing a basic password reset endpoint for Django Rest Framework). Contributions are welcome in the form of pull requests and issues! If you create a pull request, please make sure that you are not introducing breaking changes. 
