@@ -5,6 +5,8 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
+
+from phonenumber_field.phonenumber import to_python
 from rest_framework import status, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -102,6 +104,9 @@ class ResetPasswordRequestToken(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
 
+        phone_number = to_python(email)
+        is_phone = phone_number and phone_number.is_valid()
+
         # before we continue, delete all existing expired tokens
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
 
@@ -112,7 +117,10 @@ class ResetPasswordRequestToken(GenericAPIView):
         clear_expired(now_minus_expiry_time)
 
         # find a user by email address (case insensitive search)
-        users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
+        if is_phone:
+            users = User.objects.filter(**{'profile__mobile_phone_number__iexact': email})
+        else:
+            users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
 
         active_user_found = False
 
@@ -152,7 +160,8 @@ class ResetPasswordRequestToken(GenericAPIView):
                 )
                 # send a signal that the password token was created
                 # let whoever receives this signal handle sending the email for the password reset
-                reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
+                reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token,
+                                                  is_phone=is_phone)
         # done
         return Response({'status': 'OK'})
 

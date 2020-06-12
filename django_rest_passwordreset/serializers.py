@@ -1,10 +1,12 @@
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 from django.http import Http404
 from django.shortcuts import get_object_or_404 as _get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from phonenumber_field.phonenumber import to_python
 from rest_framework import serializers
 
 from django_rest_passwordreset.models import get_password_reset_token_expiry_time
@@ -18,7 +20,20 @@ __all__ = [
 
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()
+
+    def validate_email(self, value):
+        phone_number = to_python(value)
+        if phone_number and phone_number.is_valid():
+            return value
+
+        try:
+            validator = EmailValidator()
+            validator(value)
+            return value
+        except ValidationError:
+            raise ValidationError(_('Enter a valid phone number or email address.'))
+
 
 
 class PasswordValidateMixin:
