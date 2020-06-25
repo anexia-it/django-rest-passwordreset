@@ -8,6 +8,7 @@ from django.conf import settings
 from rest_framework import status, serializers, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, TokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
@@ -115,10 +116,16 @@ class ResetPasswordConfirm(GenericAPIView):
             reset_password_token.user.save()
             post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
 
+        # Log the user in
+        refresh = RefreshToken.for_user(reset_password_token.user)
+
         # Delete all password reset tokens for this user
         ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()
 
-        return Response({'status': 'OK'})
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
 
 
 class ResetPasswordRequestToken(GenericAPIView):
