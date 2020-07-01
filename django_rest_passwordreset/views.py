@@ -116,16 +116,20 @@ class ResetPasswordConfirm(GenericAPIView):
             reset_password_token.user.save()
             post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
 
-        # Log the user in
-        refresh = RefreshToken.for_user(reset_password_token.user)
+            # Log the user in
+            refresh = RefreshToken.for_user(reset_password_token.user)
 
-        # Delete all password reset tokens for this user
-        ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()
+            # Delete all password reset tokens for this user
+            ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        })
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        
+        else:
+            #User is ineligible for password reset
+            return Response({'status': 'User ineligible for password reset'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class ResetPasswordRequestToken(GenericAPIView):
