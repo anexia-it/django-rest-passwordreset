@@ -39,7 +39,7 @@ INSTALLED_APPS = (
 python manage.py migrate
 ```
 
-4. This package provides two endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
+4. This package provides three endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
 from django.conf.urls import url, include
 
@@ -48,7 +48,7 @@ urlpatterns = [
     ...
     url(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     ...
-]    
+]
 ```
 **Note**: You can adapt the url to your needs.
 
@@ -60,7 +60,7 @@ The following endpoints are provided:
  * `POST ${API_URL}/reset_password/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
  * `POST ${API_URL}/reset_password/validate_token/` - will return a 200 if a given ``token`` is valid
  
-where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
+where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/` as in the example above)
  
 ### Signals
 
