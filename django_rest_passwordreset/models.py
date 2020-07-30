@@ -5,12 +5,6 @@ from django.contrib.auth import get_user_model
 
 from django_rest_passwordreset.tokens import get_token_generator
 
-# Prior to Django 1.5, the AUTH_USER_MODEL setting does not exist.
-# Note that we don't perform this code in the compat module due to
-# bug report #1297
-# See: https://github.com/tomchristie/django-rest-framework/issues/1297
-
-AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 # get the token generator class
 TOKEN_GENERATOR_CLASS = get_token_generator()
@@ -38,7 +32,7 @@ class ResetPasswordToken(models.Model):
     )
 
     user = models.ForeignKey(
-        AUTH_USER_MODEL,
+        get_user_model(),
         related_name='password_reset_tokens',
         on_delete=models.CASCADE,
         verbose_name=_("The User which is associated to this password reset token")
