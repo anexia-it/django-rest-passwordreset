@@ -1,7 +1,7 @@
 # Django Rest Password Reset
 
 [![PyPI version](https://badge.fury.io/py/django-rest-passwordreset.svg)](https://badge.fury.io/py/django-rest-passwordreset)
-[![Build Status](https://travis-ci.org/anexia-it/django-rest-passwordreset.svg?branch=master)](https://travis-ci.org/anexia-it/django-rest-passwordreset)
+[![build-and-test actions status](https://github.com/anexia-it/django-rest-passwordreset/workflows/build-and-test/badge.svg)](https://github.com/anexia-it/django-rest-passwordreset/actions)
 
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
@@ -261,11 +261,13 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
 a matrix showing the guaranteed and tested compatibility.
 
-django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions
---------------------------------- | ----------------| ------------------------------
-0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9
-1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9
-1.1 | 1.11, 2.2 | 3.6 - 3.9
+django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions | Python |
+--------------------------------- | --------------- | ------------------------------ | ------ |
+0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9 | 2.7
+1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9 | 2.7
+1.1 | 1.11, 2.2 | 3.6 - 3.9 | 2.7
+1.2 | 3.0, 3.1 | 3.10, 3.11 | 3.5 - 3.8
+
 
 ## Documentation / Browsable API
 
