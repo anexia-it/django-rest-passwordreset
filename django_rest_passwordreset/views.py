@@ -76,8 +76,8 @@ class ResetPasswordConfirm(GenericAPIView):
     def password_change_signals(self,user):
         """ triggers pre_password_reset signal before, triggers post_password_reset after """
         pre_password_reset.send(sender=self.__class__,user=user)
-		yield
-		post_password_reset.send(sender=self.__class__, user=user)
+        yield
+        post_password_reset.send(sender=self.__class__, user=user)
 
     def get_user_from_token(self, token):
         """ uses raw reset_password_token to retrieve user from db """
