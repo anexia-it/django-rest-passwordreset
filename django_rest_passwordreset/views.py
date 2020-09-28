@@ -14,6 +14,8 @@ from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, 
     get_password_reset_lookup_field
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
 
+from contextlib import contextmanager
+
 User = get_user_model()
 
 __all__ = [
@@ -57,33 +59,54 @@ class ResetPasswordConfirm(GenericAPIView):
         password = serializer.validated_data['password']
         token = serializer.validated_data['token']
 
-        # find token
-        reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
+        # find user with token
+        user = self.get_user_from_token(token)
 
-        # change users password (if we got to this code it means that the user is_active)
-        if reset_password_token.user.eligible_for_reset():
-            pre_password_reset.send(sender=self.__class__, user=reset_password_token.user)
-            try:
-                # validate the password against existing validators
-                validate_password(
-                    password,
-                    user=reset_password_token.user,
-                    password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
-                )
-            except ValidationError as e:
-                # raise a validation error for the serializer
-                raise exceptions.ValidationError({
-                    'password': e.messages
-                })
+        # change user's password (if we got to this code it means that the user is_active)
+        if user.eligible_for_reset():
+            with self.password_change_signals(user): # Triggers signals before and after the context
+                self.validate_password(user, password)
+                self.reset_password(user, password)
 
-            reset_password_token.user.set_password(password)
-            reset_password_token.user.save()
-            post_password_reset.send(sender=self.__class__, user=reset_password_token.user)
-
-        # Delete all password reset tokens for this user
-        ResetPasswordToken.objects.filter(user=reset_password_token.user).delete()
+        self.delete_previous_tokens(user=user)
 
         return Response({'status': 'OK'})
+
+    @contextmanager
+    def password_change_signals(self,user):
+        """ triggers pre_password_reset signal before, triggers post_password_reset after """
+        pre_password_reset.send(sender=self.__class__,user=user)
+		yield
+		post_password_reset.send(sender=self.__class__, user=user)
+
+    def get_user_from_token(self, token):
+        """ uses raw reset_password_token to retrieve user from db """
+        reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
+        return reset_password_token.user
+
+    def validate_password(self, user, password):
+        """ validate the password against the user and converts the Django ValidationError in a DRF ValidationError """
+        try:
+            # validate the password against existing validators
+            validate_password(
+                password=password,
+                user=user,
+                password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
+            )
+        except ValidationError as e:
+            # raise a validation error for the serializer
+            raise exceptions.ValidationError({
+                'password': e.messages
+            })
+
+    def reset_password(self, user, password):
+        """ resets the user's password """
+        user.set_password(password)
+        user.save()
+
+    def delete_previous_tokens(self, user):
+        """ deletes tokens previously associated with this user """
+        ResetPasswordToken.objects.filter(user=user).delete()
 
 
 class ResetPasswordRequestToken(GenericAPIView):
