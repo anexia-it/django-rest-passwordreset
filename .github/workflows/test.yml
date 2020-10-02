@@ -1,4 +1,4 @@
-name: build-and-test
+name: Run linter and tests
 on: [push, pull_request]
 
 jobs:
@@ -79,4 +79,3 @@ jobs:
       run: |
         cd tests
         python manage.py test
-
