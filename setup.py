@@ -10,7 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-rest-passwordreset',
-    version='1.2',
+    version=os.getenv('PACKAGE_VERSION', '0.0.0').replace('refs/tags/', ''),
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',
