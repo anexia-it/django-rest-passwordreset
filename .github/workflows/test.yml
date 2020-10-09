@@ -26,14 +26,7 @@ jobs:
             django-version: "3.1"
           # DRF 3.10 imports FieldDoesNotExist from django.db.models,
           # which has been moved to django.core.exceptions as of Django 3.1
-          - python-version: "3.6"
-            django-version: "3.1"
-            drf-version: "3.10"
-          - python-version: "3.7"
-            django-version: "3.1"
-            drf-version: "3.10"
-          - python-version: "3.8"
-            django-version: "3.1"
+          - django-version: "3.1"
             drf-version: "3.10"
 
     steps:
