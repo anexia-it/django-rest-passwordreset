@@ -274,6 +274,39 @@ django-rest-passwordreset Version | Django Versions | Django Rest Framework Vers
 
 This package supports the [DRF auto-generated documentation](https://www.django-rest-framework.org/topics/documenting-your-api/) (via `coreapi`) as well as the [DRF browsable API](https://www.django-rest-framework.org/topics/browsable-api/).
 
+To add the endpoints to the browsable API, you can use a helper function in your `urls.py` file:
+```python
+from rest_framework.routers import DefaultRouter
+from django_rest_passwordreset.urls import add_reset_password_urls_to_router
+
+router = DefaultRouter()
+add_reset_password_urls_to_router(router, base_path='api/auth/passwordreset')
+```
+
+Alternatively you can import the ViewSets manually and customize the routes for your setup:
+```python
+from rest_framework.routers import DefaultRouter
+from django_rest_passwordreset.views import ResetPasswordValidateTokenViewSet, ResetPasswordConfirmViewSet, \
+    ResetPasswordRequestTokenViewSet
+
+router = DefaultRouter()
+router.register(
+    r'api/auth/passwordreset/validate_token',
+    ResetPasswordValidateTokenViewSet,
+    basename='reset-password-validate'
+)
+router.register(
+    r'api/auth/passwordreset/confirm',
+    ResetPasswordConfirmViewSet,
+    basename='reset-password-confirm'
+)
+router.register(
+    r'api/auth/passwordreset/',
+    ResetPasswordRequestTokenViewSet,
+    basename='reset-password-request'
+)
+```
+
 ![drf_browsable_email_validation](docs/browsable_api_email_validation.png "Browsable API E-Mail Validation")
 
 ![drf_browsable_password_validation](docs/browsable_api_password_validation.png "Browsable API E-Mail Validation")

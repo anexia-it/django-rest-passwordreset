@@ -1,9 +1,30 @@
-""" URL Configuration for core auth
-"""
-from django.conf.urls import url, include
-from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm, reset_password_validate_token
+""" URL Configuration for core auth """
+from django.conf.urls import url
+
+from django_rest_passwordreset.views import ResetPasswordValidateTokenViewSet, ResetPasswordConfirmViewSet, \
+    ResetPasswordRequestTokenViewSet, reset_password_validate_token, reset_password_confirm, \
+    reset_password_request_token
 
 app_name = 'password_reset'
+
+
+def add_reset_password_urls_to_router(router, base_path=''):
+    router.register(
+        base_path + r'/validate_token',
+        ResetPasswordValidateTokenViewSet,
+        basename='reset-password-validate'
+    )
+    router.register(
+        base_path + r'/confirm',
+        ResetPasswordConfirmViewSet,
+        basename='reset-password-confirm'
+    )
+    router.register(
+        base_path + r'',
+        ResetPasswordRequestTokenViewSet,
+        basename='reset-password-request'
+    )
+
 
 urlpatterns = [
     url(r'^validate_token/', reset_password_validate_token, name="reset-password-validate"),

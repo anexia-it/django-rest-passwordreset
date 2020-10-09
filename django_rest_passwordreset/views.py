@@ -1,17 +1,19 @@
 from datetime import timedelta
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password, get_password_validators
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
+
 from django.conf import settings
-from rest_framework import status, exceptions
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password, get_password_validators
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from rest_framework import exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
-from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, ResetTokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
     get_password_reset_lookup_field
+from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, ResetTokenSerializer
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
 
 User = get_user_model()
@@ -22,7 +24,10 @@ __all__ = [
     'ResetPasswordRequestToken',
     'reset_password_validate_token',
     'reset_password_confirm',
-    'reset_password_request_token'
+    'reset_password_request_token',
+    'ResetPasswordValidateTokenViewSet',
+    'ResetPasswordConfirmViewSet',
+    'ResetPasswordRequestTokenViewSet'
 ]
 
 HTTP_USER_AGENT_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER', 'HTTP_USER_AGENT')
@@ -153,6 +158,35 @@ class ResetPasswordRequestToken(GenericAPIView):
                 reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
         # done
         return Response({'status': 'OK'})
+
+
+class ResetPasswordValidateTokenViewSet(ResetPasswordValidateToken, GenericViewSet):
+    """
+    An Api ViewSet which provides a method to verify that a token is valid
+    """
+
+    def create(self, request, *args, **kwargs):
+        return super(ResetPasswordValidateTokenViewSet, self).post(request, *args, **kwargs)
+
+
+class ResetPasswordConfirmViewSet(ResetPasswordConfirm, GenericViewSet):
+    """
+    An Api ViewSet which provides a method to reset a password based on a unique token
+    """
+
+    def create(self, request, *args, **kwargs):
+        return super(ResetPasswordConfirmViewSet, self).post(request, *args, **kwargs)
+
+
+class ResetPasswordRequestTokenViewSet(ResetPasswordRequestToken, GenericViewSet):
+    """
+    An Api ViewSet which provides a method to request a password reset token based on an e-mail address
+
+    Sends a signal reset_password_token_created when a reset token was created
+    """
+
+    def create(self, request, *args, **kwargs):
+        return super(ResetPasswordRequestTokenViewSet, self).post(request, *args, **kwargs)
 
 
 reset_password_validate_token = ResetPasswordValidateToken.as_view()
