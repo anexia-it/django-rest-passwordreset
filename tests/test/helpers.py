@@ -57,7 +57,7 @@ class HelperMixin:
         )
 
     def rest_do_reset_password_with_token(self, token, new_password, HTTP_USER_AGENT='', REMOTE_ADDR='127.0.0.1'):
-        """ REST API wrapper for requesting a password reset token """
+        """ REST API wrapper for resetting a user's password using a token """
         data = {
             'token': token,
             'password': new_password

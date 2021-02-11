@@ -2,14 +2,14 @@ from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password, get_password_validators
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
-from rest_framework import status, serializers, exceptions
+from rest_framework import status, exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, TokenSerializer
+from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, ResetTokenSerializer
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
     get_password_reset_lookup_field
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
@@ -17,7 +17,7 @@ from django_rest_passwordreset.signals import reset_password_token_created, pre_
 User = get_user_model()
 
 __all__ = [
-    'ValidateToken',
+    'ResetPasswordValidateToken',
     'ResetPasswordConfirm',
     'ResetPasswordRequestToken',
     'reset_password_validate_token',
@@ -35,7 +35,7 @@ class ResetPasswordValidateToken(GenericAPIView):
     """
     throttle_classes = ()
     permission_classes = ()
-    serializer_class = TokenSerializer
+    serializer_class = ResetTokenSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -82,9 +82,6 @@ class ResetPasswordConfirm(GenericAPIView):
         password = serializer.validated_data['password']
         token = serializer.validated_data['token']
         response_dict = dict({"status_code": None, "message": None, "status": None})
-
-        # get token validation time
-        password_reset_token_validation_time = get_password_reset_token_expiry_time()
 
         # find token
         reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
@@ -177,7 +174,7 @@ class ResetPasswordRequestToken(GenericAPIView):
             raise exceptions.ValidationError({
 
                 'email': [_(
-                    "There is no active user associated with this e-mail address or the password can not be changed")],
+                    "We couldn't find an account associated with that email. Please try a different e-mail address.")],
             })
 
         # last but not least: iterate over all users that are active and can change their password
