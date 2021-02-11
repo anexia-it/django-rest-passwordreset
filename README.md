@@ -1,7 +1,8 @@
 # Django Rest Password Reset
 
-[![PyPI version](https://badge.fury.io/py/django-rest-passwordreset.svg)](https://badge.fury.io/py/django-rest-passwordreset)
-[![Build Status](https://travis-ci.org/anx-ckreuzberger/django-rest-passwordreset.svg?branch=master)](https://travis-ci.org/anx-ckreuzberger/django-rest-passwordreset)
+[![PyPI version](https://img.shields.io/pypi/v/django-rest-passwordreset.svg)](https://pypi.org/project/django-rest-passwordreset/)
+[![build-and-test actions status](https://github.com/anexia-it/django-rest-passwordreset/workflows/build-and-test/badge.svg)](https://github.com/anexia-it/django-rest-passwordreset/actions)
+[![Codecov](https://img.shields.io/codecov/c/gh/anexia-it/django-rest-passwordreset)](https://codecov.io/gh/anexia-it/django-rest-passwordreset)
 
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
@@ -34,12 +35,12 @@ INSTALLED_APPS = (
 )
 ```
 
-3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefor you have to run django migrations:
+3. This package stores tokens in a separate database table (see [django_rest_passwordreset/models.py](django_rest_passwordreset/models.py)). Therefore, you have to run django migrations:
 ```bash
 python manage.py migrate
 ```
 
-4. This package provides two endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
+4. This package provides three endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
 from django.conf.urls import url, include
 
@@ -48,7 +49,7 @@ urlpatterns = [
     ...
     url(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     ...
-]    
+]
 ```
 **Note**: You can adapt the url to your needs.
 
@@ -60,13 +61,13 @@ The following endpoints are provided:
  * `POST ${API_URL}/reset_password/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
  * `POST ${API_URL}/reset_password/validate_token/` - will return a 200 if a given ``token`` is valid
  
-where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/`)
+where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/` as in the example above)
  
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
-* ``pre_password_reset(user)`` - fired just before a password is being reset
-* ``post_password_reset(user)`` - fired after a password has been reset
+* ``pre_password_reset(sender, user)`` - fired just before a password is being reset
+* ``post_password_reset(sender, user)`` - fired after a password has been reset
 
 ### Example for sending an e-mail
 
@@ -100,7 +101,9 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
-        'reset_password_url': "{}?token={}".format(reverse('password_reset:reset-password-request'), reset_password_token.key)
+        'reset_password_url': "{}?token={}".format(
+            instance.request.build_absolute_uri(reverse('password_reset:reset-password-confirm')),
+            reset_password_token.key)
     }
 
     # render email text
@@ -270,11 +273,13 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
 a matrix showing the guaranteed and tested compatibility.
 
-django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions
---------------------------------- | ----------------| ------------------------------
-0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9
-1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9
-1.1 | 1.11, 2.2 | 3.6 - 3.9
+django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions | Python |
+--------------------------------- | --------------- | ------------------------------ | ------ |
+0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9 | 2.7
+1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9 | 2.7
+1.1 | 1.11, 2.2 | 3.6 - 3.9 | 2.7
+1.2 | 2.2, 3.0, 3.1 | 3.10, 3.11 | 3.5 - 3.8
+
 
 ## Documentation / Browsable API
 
@@ -358,7 +363,6 @@ unit tests.
 
 Use this code snippet to run tests:
 ```bash
-pip install -r requirements_test.txt
 python setup.py install
 cd tests
 python manage.py test

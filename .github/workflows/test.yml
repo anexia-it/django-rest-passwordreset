@@ -1,0 +1,86 @@
+name: Run linter and tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.5"
+          - "3.6"
+          - "3.7"
+          - "3.8"
+        django-version:
+          - "2.2"
+          - "3.0"
+          - "3.1"
+        drf-version:
+          - "3.10"
+          - "3.11"
+        exclude:
+          - python-version: "3.5"
+            django-version: "3.0"
+          - python-version: "3.5"
+            django-version: "3.1"
+          # DRF 3.10 imports FieldDoesNotExist from django.db.models,
+          # which has been moved to django.core.exceptions as of Django 3.1
+          - django-version: "3.1"
+            drf-version: "3.10"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 codecov
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Install Django version
+      run: |
+        python -m pip install "Django==${{ matrix.django-version }}.*"
+
+    - name: Install DRF version
+      run: |
+        python -m pip install "djangorestframework==${{ matrix.drf-version }}.*"
+
+    - name: Python, Django and DRF versions
+      run: |
+        echo "Python ${{ matrix.python-version }} -> Django ${{ matrix.django-version }} -> DRF ${{ matrix.drf-version }}"
+        python --version
+        echo "Django: `django-admin --version`"
+        echo "DRF: `pip show djangorestframework|grep Version|sed s/Version:\ //`"
+
+    - name: Setup environment
+      run: |
+        pip install -e .
+        python setup.py install
+
+    - name: Run tests
+      run: |
+        # prepare Django project: link all necessary data from the test project into the root directory
+        # Hint: Simply changing the directory does not work (leads to missing files in coverage report)
+        ln -s ./tests/test test
+        ln -s ./tests/manage.py manage.py
+        ln -s ./tests/settings.py settings.py
+        ln -s ./tests/urls.py urls.py
+
+        # run tests with coverage
+        coverage run --source='./django_rest_passwordreset' manage.py test
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
