@@ -41,7 +41,7 @@ class ResetPasswordValidateToken(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         token = serializer.validated_data['token']
-        response_dict = dict({"status_code": None, "status":None, "message": None})
+        response_dict = dict({"status_code": None, "status": None, "message": None})
         # get token validation time
         password_reset_token_validation_time = get_password_reset_token_expiry_time()
 
@@ -208,11 +208,10 @@ class ResetPasswordRequestToken(GenericAPIView):
 
 def get_response_message(message_key):
     """
-        A function return status message based on conditions
-        conditions: if message attribute define in settings then it will 
-                    return user define message otherwise, return static defined message
-        params: message_key
-        return: status_message
+        If message_key exists in settings.py, the corresponding message will be returned. Otherwise message_key
+        is returned
+        :param message_key: Key of the message in settings.py
+        :return: status_message
     """
 
     status_message = getattr(settings, message_key, message_key)
