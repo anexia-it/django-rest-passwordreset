@@ -154,10 +154,10 @@ into Django settings.py file.
 For optional configurable response messages, add the following properties to settings.py
 ```python
 PASSWORD_CHANGED = 'Your password has been changed' 
-TOKEN_EXPIRED = 'Password reset link is invalid or expired'
+TOKEN_EXPIRED = 'Your token has expired'
 PASSWORD_REQUEST_ACCEPT = 'Please check your email for the reset password link'
-TOKEN_NOT_FOUND = 'Requested token is invalid'
-TOKEN_VALID = 'Requested token is valid'
+TOKEN_NOT_FOUND = 'Your token is invalid'
+TOKEN_VALID = 'Your token is valid'
 ```
 
 ## Custom Remote IP Address and User Agent Header Lookup
