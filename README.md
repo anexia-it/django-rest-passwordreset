@@ -151,14 +151,13 @@ into Django settings.py file.
 
 ## Configurable Response
 
-To configurable response messages need to add following properties into settings.py
-
+For optional configurable response messages, add the following properties to settings.py
 ```python
-PASSWORD_CHANGED = 'Your password change message' 
-TOKEN_EXPIRED = 'Your token expired'
-PASSWORD_REQUEST_ACCEPT = 'Your password valid request message'
-TOKEN_NOT_FOUND = 'Your token not found message'
-TOKEN_VALID = 'Your token valid message'
+PASSWORD_CHANGED = 'Your password has been changed' 
+TOKEN_EXPIRED = 'Password reset link is invalid or expired'
+PASSWORD_REQUEST_ACCEPT = 'Please check your email for the reset password link'
+TOKEN_NOT_FOUND = 'Requested token is invalid'
+TOKEN_VALID = 'Requested token is valid'
 ```
 
 ## Custom Remote IP Address and User Agent Header Lookup
