@@ -83,6 +83,9 @@ class ResetPasswordConfirm(GenericAPIView):
         token = serializer.validated_data['token']
         response_dict = dict({"status_code": None, "message": None, "status": None})
 
+        # get token validation time
+        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+
         # find token
         reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
 
