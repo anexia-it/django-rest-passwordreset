@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='resetpasswordtoken',
             name='user_agent',
-            field=models.TextField(blank=True, default='', verbose_name='HTTP User Agent'),
+            field=models.CharField(blank=True, default='', max_length=512, verbose_name='HTTP User Agent'),
         ),
     ]

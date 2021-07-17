@@ -67,6 +67,7 @@ class ResetPasswordToken(models.Model):
         verbose_name=_("HTTP User Agent"),
         default="",
         blank=True,
+        max_length=512,
     )
 
     def save(self, *args, **kwargs):
