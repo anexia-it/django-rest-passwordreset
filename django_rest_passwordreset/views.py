@@ -121,6 +121,7 @@ class ResetPasswordRequestToken(GenericAPIView):
         for user in users:
             if user.eligible_for_reset():
                 active_user_found = True
+                break
 
         # No active user found, raise a validation error
         # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
