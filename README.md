@@ -42,26 +42,26 @@ python manage.py migrate
 
 4. This package provides three endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
-from django.conf.urls import url, include
-
+from django.urls import path, include
 
 urlpatterns = [
     ...
-    url(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     ...
 ]
 ```
-**Note**: You can adapt the url to your needs.
+**Note**: You can adapt the URL to your needs.
 
 ### Endpoints
 
 The following endpoints are provided:
 
- * `POST ${API_URL}/` - request a reset password token by using the ``email`` parameter
+ * `POST ${API_URL}` - request a reset password token by using the ``email`` parameter
  * `POST ${API_URL}/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
  * `POST ${API_URL}/validate_token/` - will return a 200 if a given ``token`` is valid
  
-where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset` as in the example above)
+where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/` as in the example above)
+
  
 ### Signals
 
@@ -132,7 +132,7 @@ If you want to test this locally, I recommend using some kind of fake mailserver
 
 # Configuration / Settings
 
-The following settings can be set in Djangos ``settings.py`` file:
+The following settings can be set in Django ``settings.py`` file:
 
 * `DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME` - time in hours about how long the token is active (Default: 24)
 
