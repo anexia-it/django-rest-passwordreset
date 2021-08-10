@@ -61,6 +61,7 @@ The following endpoints are provided:
  * `POST ${API_URL}/validate_token/` - will return a 200 if a given ``token`` is valid
  
 where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/` as in the example above)
+
  
 ### Signals
 
