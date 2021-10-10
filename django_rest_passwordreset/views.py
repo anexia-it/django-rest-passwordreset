@@ -41,6 +41,7 @@ class ResetPasswordValidateToken(GenericAPIView):
     throttle_classes = ()
     permission_classes = ()
     serializer_class = ResetTokenSerializer
+    authentication_classes = ()
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -55,6 +56,7 @@ class ResetPasswordConfirm(GenericAPIView):
     throttle_classes = ()
     permission_classes = ()
     serializer_class = PasswordTokenSerializer
+    authentication_classes = ()
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -100,6 +102,7 @@ class ResetPasswordRequestToken(GenericAPIView):
     throttle_classes = ()
     permission_classes = ()
     serializer_class = EmailSerializer
+    authentication_classes = ()
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
