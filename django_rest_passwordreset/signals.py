@@ -1,4 +1,4 @@
-import django.dispatch
+from django.dispatch import Signal
 
 __all__ = [
     'reset_password_token_created',
@@ -6,10 +6,17 @@ __all__ = [
     'post_password_reset',
 ]
 
-reset_password_token_created = django.dispatch.Signal(
-    providing_args=["instance", "reset_password_token"],
-)
+"""
+Signal arguments: instance, reset_password_token
+"""
+reset_password_token_created = Signal()
 
-pre_password_reset = django.dispatch.Signal(providing_args=["user"])
+"""
+Signal arguments: user
+"""
+pre_password_reset = Signal()
 
-post_password_reset = django.dispatch.Signal(providing_args=["user"])
+"""
+Signal arguments: user
+"""
+post_password_reset = Signal()
