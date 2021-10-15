@@ -1,3 +1,4 @@
+import unicodedata
 from datetime import timedelta
 
 from django.conf import settings
@@ -32,6 +33,18 @@ __all__ = [
 
 HTTP_USER_AGENT_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER', 'HTTP_USER_AGENT')
 HTTP_IP_ADDRESS_HEADER = getattr(settings, 'DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER', 'REMOTE_ADDR')
+
+
+def _unicode_ci_compare(s1, s2):
+    """
+    Perform case-insensitive comparison of two identifiers, using the
+    recommended algorithm from Unicode Technical Report 36, section
+    2.11.2(B)(2).
+    """
+    normalized1 = unicodedata.normalize('NFKC', s1)
+    normalized2 = unicodedata.normalize('NFKC', s2)
+
+    return normalized1.casefold() == normalized2.casefold()
 
 
 class ResetPasswordValidateToken(GenericAPIView):
@@ -139,7 +152,8 @@ class ResetPasswordRequestToken(GenericAPIView):
         # last but not least: iterate over all users that are active and can change their password
         # and create a Reset Password Token and send a signal with the created token
         for user in users:
-            if user.eligible_for_reset():
+            if user.eligible_for_reset() and \
+                    _unicode_ci_compare(email, getattr(user, get_password_reset_lookup_field())):
                 # define the token as none for now
                 token = None
 
