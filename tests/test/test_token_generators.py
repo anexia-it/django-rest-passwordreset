@@ -1,15 +1,13 @@
-from django.test import TestCase
 from django.conf import settings
+from django.test import TestCase
 
-from django_rest_passwordreset.tokens import RandomStringTokenGenerator, RandomNumberTokenGenerator, get_token_generator
+from django_rest_passwordreset.tokens import RandomNumberTokenGenerator, RandomStringTokenGenerator, get_token_generator
 
 
 class TokenGeneratorTestCase(TestCase):
     """
     Tests that the token generators work as expected
     """
-    def setUp(self):
-        pass
 
     def test_string_token_generator(self):
         token_generator = RandomStringTokenGenerator(min_length=10, max_length=15)
@@ -17,13 +15,13 @@ class TokenGeneratorTestCase(TestCase):
         tokens = []
 
         # generate 100 tokens
-        for i in range(0, 100):
+        for _ in range(0, 100):
             tokens.append(token_generator.generate_token())
 
         # validate that those 100 tokens are unique
         unique_tokens = list(set(tokens))
 
-        self.assertEquals(
+        self.assertEqual(
             len(tokens), len(unique_tokens), msg="StringTokenGenerator must create unique tokens"
         )
         ################################################################################################################
@@ -46,13 +44,13 @@ class TokenGeneratorTestCase(TestCase):
         tokens = []
 
         # generate 100 tokens
-        for i in range(0, 100):
+        for _ in range(0, 100):
             tokens.append(token_generator.generate_token())
 
         # validate that those 100 tokens are unique
         unique_tokens = list(set(tokens))
 
-        self.assertEquals(
+        self.assertEqual(
             len(tokens), len(unique_tokens), msg="RandomNumberTokenGenerator must create unique tokens"
         )
         ################################################################################################################
@@ -62,18 +60,15 @@ class TokenGeneratorTestCase(TestCase):
 
         # validate that each token is a number between 100000 and 999999
         for token in tokens:
-            is_number = False
             try:
                 num = int(token)
-                is_number = True
             except:
-                is_number = False
+                self.fail("RandomNumberTokenGenerator must return a number, but returned " + token)
 
-            self.assertEquals(is_number, True, msg="RandomNumberTokenGenerator must return a number, but returned "
-                                                   + token)
-
-            self.assertGreaterEqual(num, 1000000000, msg="RandomNumberTokenGenerator must return a number greater or equal to 1000000000")
-            self.assertLess(num, 9999999999, msg="RandomNumberTokenGenerator must return a number less or equal to 9999999999")
+            self.assertGreaterEqual(num, 1000000000,
+                                    msg="RandomNumberTokenGenerator must return a number greater or equal to 1000000000")
+            self.assertLess(num, 9999999999,
+                            msg="RandomNumberTokenGenerator must return a number less or equal to 9999999999")
 
     def test_generate_token_generator_from_empty_settings(self):
         """
@@ -86,7 +81,7 @@ class TokenGeneratorTestCase(TestCase):
 
         token_generator = get_token_generator()
 
-        self.assertEquals(
+        self.assertEqual(
             token_generator.__class__, RandomStringTokenGenerator,
             msg="If no class is set in DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG, a RandomStringTokenGenerator should"
                 "be created"
@@ -104,7 +99,7 @@ class TokenGeneratorTestCase(TestCase):
 
         token_generator = get_token_generator()
 
-        self.assertEquals(
+        self.assertEqual(
             token_generator.__class__, RandomStringTokenGenerator,
             msg="get_token_generator() should return an instance of RandomStringTokenGenerator "
                 "if configured in settings"
@@ -122,7 +117,7 @@ class TokenGeneratorTestCase(TestCase):
 
         token_generator = get_token_generator()
 
-        self.assertEquals(
+        self.assertEqual(
             token_generator.__class__, RandomNumberTokenGenerator,
             msg="get_token_generator() should return an instance of RandomNumberTokenGenerator "
                 "if configured in settings"
