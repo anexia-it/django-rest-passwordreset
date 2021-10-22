@@ -20,6 +20,7 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.user2 = User.objects.create_user("user2", "user2@mail.com", "secret2")
         self.user3 = User.objects.create_user("user3@mail.com", "not-that-mail@mail.com", "secret3")
         self.user4 = User.objects.create_user("user4", "user4@mail.com")
+        self.user5 = User.objects.create_user("user5", "uѕer5@mail.com", "secret5")  # email contains kyrillic s
 
     def test_try_reset_password_email_does_not_exist(self):
         """ Tests requesting a token for an email that does not exist """
@@ -28,6 +29,13 @@ class AuthTestCase(APITestCase, HelperMixin):
         decoded_response = json.loads(response.content.decode())
         # response should have "email" in it
         self.assertTrue("email" in decoded_response)
+
+    def test_unicode_email_reset(self):
+        response = self.rest_do_request_reset_token(email="uѕer5@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        decoded_response = json.loads(response.content.decode())
+        self.assertEqual(decoded_response.get("email")[0], 'Enter a valid email address.')
 
     @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
     def test_validate_token(self, mock_reset_password_token_created):
