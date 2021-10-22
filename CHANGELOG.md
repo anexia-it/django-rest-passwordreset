@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/project/django-rest-passwordreset/).
 
-## [1.2.0 - unreleased]
+## [1.2.1]
+### Fixed
+- CVE-2019-19844 potentials
+
+## [1.2.0]
 ### Added
 - Support for Django 3.x, DRF 3.1x 
 ### Changed
@@ -41,7 +45,8 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 ## [0.9.0]
 - Initial Release
 
-[1.2.0 - unreleased]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.1.0...HEAD
+[1.2.1]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.2.0...1.2.1
+[1.2.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/0.9.7...1.0.0
 [0.9.7]: https://github.com/anexia-it/django-rest-passwordreset/compare/0.9.6...0.9.7
