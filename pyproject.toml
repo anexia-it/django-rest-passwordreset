@@ -5,11 +5,10 @@ build-backend = "flit_core.buildapi"
 [tool.flit.metadata]
 module = "django_rest_passwordreset"
 dist-name = "django-ninja-passwordreset"
-author = [
+authors = [
    {name = "Christian Kreuzberger", email = "ckreuzberger@anexia-it.com"},
    {name = "Ezeudoh Tochukwu", email = "tochukwu.ezeudoh@gmail.com"},
 ]
-author-email = "tochukwu.ezeudoh@gmail.com"
 home-page = "https://github.com/eadwinCode/django-ninja-passwordreset"
 classifiers = [
     "Intended Audience :: Information Technology",
