@@ -19,7 +19,7 @@ This package basically provides two REST endpoints:
 
 1. Install the package from pypi using pip:
 ```bash
-pip install django-rest-passwordreset
+pip install django-ninja-passwordreset
 ```
 
 2. Add ``django_rest_passwordreset`` to your ``INSTALLED_APPS`` (after ``rest_framework``) within your Django settings file:

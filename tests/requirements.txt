@@ -1,2 +1,0 @@
-django>=2.2,<3.3
-djangorestframework>=3.12.4,<3.13

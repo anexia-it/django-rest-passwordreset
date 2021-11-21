@@ -3,7 +3,10 @@ from django.conf.urls import include
 from django.contrib import admin
 from django.urls import path
 
+from .api import api
+
+print(f"Was here: {__name__}")
 urlpatterns = [
-    path("api/password_reset/", include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path("api/password_reset/", api.urls),
     path("admin/", admin.site.urls),
 ]
