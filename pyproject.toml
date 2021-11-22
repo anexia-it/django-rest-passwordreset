@@ -64,6 +64,7 @@ test = [
     "isort",
     "flake8",
     "pytest",
-    "pytest-django"
+    "pytest-django",
+    "pytest-cov",
 ]
 doc = []
