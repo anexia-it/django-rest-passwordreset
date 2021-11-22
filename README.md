@@ -1,7 +1,7 @@
 # Django Rest Password Reset
 
 [![PyPI version](https://img.shields.io/pypi/v/django-ninja-passwordreset.svg)](https://pypi.org/project/django-ninja-passwordreset/)
-[![build-and-test actions status](https://github.com/eadwinCode/django-ninja-passwordreset/workflows/build-and-test/badge.svg)](https://github.com/eadwinCode/django-ninja-passwordreset/actions)
+[![build-and-test actions status](https://github.com/eadwinCode/django-ninja-passwordreset/workflows/Test/badge.svg)](https://github.com/eadwinCode/django-ninja-passwordreset/actions)
 [![Codecov](https://img.shields.io/codecov/c/gh/eadwinCode/django-ninja-passwordreset)](https://codecov.io/gh/eadwinCode/django-ninja-passwordreset)
 
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
