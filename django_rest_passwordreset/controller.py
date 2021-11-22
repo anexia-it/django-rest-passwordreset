@@ -173,4 +173,3 @@ class ResetPasswordController(APIController):
                 )
         # done
         return self.create_response({"status": "OK"})
-
