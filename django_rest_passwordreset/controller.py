@@ -27,7 +27,7 @@ from .signals import (
 
 User = get_user_model()
 
-__all__ = ["ResetPasswordController", "DjangoResetPasswordController"]
+__all__ = ["ResetPasswordController"]
 
 HTTP_USER_AGENT_HEADER = getattr(
     settings, "DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER", "HTTP_USER_AGENT"
@@ -49,7 +49,10 @@ def _unicode_ci_compare(s1, s2):
     return normalized1.casefold() == normalized2.casefold()
 
 
+@router("password_reset/", tags=["Password Reset"])
 class ResetPasswordController(APIController):
+    auto_import = False
+
     @route.post("validate_token/", url_name="reset-password-validate")
     def validate_token(self, reset_token: ResetTokenSerializer):
         """
@@ -171,7 +174,3 @@ class ResetPasswordController(APIController):
         # done
         return self.create_response({"status": "OK"})
 
-
-@router("", tags=["Password Reset"])
-class DjangoResetPasswordController(ResetPasswordController):
-    auto_import = False

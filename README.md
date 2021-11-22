@@ -1,8 +1,8 @@
 # Django Rest Password Reset
 
-[![PyPI version](https://img.shields.io/pypi/v/django-rest-passwordreset.svg)](https://pypi.org/project/django-rest-passwordreset/)
-[![build-and-test actions status](https://github.com/anexia-it/django-rest-passwordreset/workflows/build-and-test/badge.svg)](https://github.com/anexia-it/django-rest-passwordreset/actions)
-[![Codecov](https://img.shields.io/codecov/c/gh/anexia-it/django-rest-passwordreset)](https://codecov.io/gh/anexia-it/django-rest-passwordreset)
+[![PyPI version](https://img.shields.io/pypi/v/django-ninja-passwordreset.svg)](https://pypi.org/project/django-ninja-passwordreset/)
+[![build-and-test actions status](https://github.com/eadwinCode/django-ninja-passwordreset/workflows/build-and-test/badge.svg)](https://github.com/eadwinCode/django-ninja-passwordreset/actions)
+[![Codecov](https://img.shields.io/codecov/c/gh/eadwinCode/django-ninja-passwordreset)](https://codecov.io/gh/eadwinCode/django-ninja-passwordreset)
 
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
 reset tokens via their registered e-mail address.
@@ -28,7 +28,7 @@ INSTALLED_APPS = (
     ...
     'django.contrib.auth',
     ...
-    'rest_framework',
+    'ninja_extra',
     ...
     'django_rest_passwordreset',
     ...
@@ -42,11 +42,16 @@ python manage.py migrate
 
 4. This package provides three endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
-from django.urls import path, include
+from django.urls import path
+from ninja_extra import NinjaExtraAPI
+from django_rest_passwordreset.controller import ResetPasswordController
+
+api = NinjaExtraAPI(urls_namespace='password_test')
+api.register_controllers(ResetPasswordController)
 
 urlpatterns = [
-    ...
-    path(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    ...,
+    path(r'^api/', api.urls),
     ...
 ]
 ```
@@ -256,64 +261,6 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
         ).decode()[0:length]
 ```
 
-
-## Compatibility Matrix
-
-This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
-a matrix showing the guaranteed and tested compatibility.
-
-django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions | Python |
---------------------------------- | --------------- | ------------------------------ | ------ |
-0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9 | 2.7
-1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9 | 2.7
-1.1 | 1.11, 2.2 | 3.6 - 3.9 | 2.7
-1.2 | 2.2, 3.0, 3.1 | 3.10, 3.11 | 3.5 - 3.8
-
-
-## Documentation / Browsable API
-
-This package supports the [DRF auto-generated documentation](https://www.django-rest-framework.org/topics/documenting-your-api/) (via `coreapi`) as well as the [DRF browsable API](https://www.django-rest-framework.org/topics/browsable-api/).
-
-To add the endpoints to the browsable API, you can use a helper function in your `urls.py` file:
-```python
-from rest_framework.routers import DefaultRouter
-from django_rest_passwordreset.urls import add_reset_password_urls_to_router
-
-router = DefaultRouter()
-add_reset_password_urls_to_router(router, base_path='api/auth/passwordreset')
-```
-
-Alternatively you can import the ViewSets manually and customize the routes for your setup:
-```python
-from rest_framework.routers import DefaultRouter
-from django_rest_passwordreset.views import ResetPasswordValidateTokenViewSet, ResetPasswordConfirmViewSet, \
-    ResetPasswordRequestTokenViewSet
-
-router = DefaultRouter()
-router.register(
-    r'api/auth/passwordreset/validate_token',
-    ResetPasswordValidateTokenViewSet,
-    basename='reset-password-validate'
-)
-router.register(
-    r'api/auth/passwordreset/confirm',
-    ResetPasswordConfirmViewSet,
-    basename='reset-password-confirm'
-)
-router.register(
-    r'api/auth/passwordreset/',
-    ResetPasswordRequestTokenViewSet,
-    basename='reset-password-request'
-)
-```
-
-![drf_browsable_email_validation](docs/browsable_api_email_validation.png "Browsable API E-Mail Validation")
-
-![drf_browsable_password_validation](docs/browsable_api_password_validation.png "Browsable API E-Mail Validation")
-
-![coreapi_docs](docs/coreapi_docs.png "Core API Docs")
-
-
 ## Known Issues / FAQ
 
 ### Django 2.1 Migrations - Multiple Primary keys for table ...
@@ -383,17 +330,6 @@ unit tests.
 
 Use this code snippet to run tests:
 ```bash
-python setup.py install
-cd tests
-python manage.py test
-```
-
-## Release on PyPi
-
-To release this package on pypi, the following steps are used:
-
-```bash
-rm -rf dist/ build/
-python setup.py sdist
-twine upload dist/*
+make install
+make test
 ```
