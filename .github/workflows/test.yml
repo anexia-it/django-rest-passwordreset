@@ -20,6 +20,6 @@ jobs:
       - name: Install Dependencies
         run: flit install --symlink
       - name: Test
-        run: pytest --cov=ninja_jwt --cov-report=xml tests
+        run: pytest --cov=django_rest_passwordreset --cov-report=xml tests
       - name: Coverage
         uses: codecov/codecov-action@v1
