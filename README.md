@@ -267,7 +267,7 @@ django-rest-passwordreset Version | Django Versions | Django Rest Framework Vers
 0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9 | 2.7
 1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9 | 2.7
 1.1 | 1.11, 2.2 | 3.6 - 3.9 | 2.7
-1.2 | 2.2, 3.0, 3.1 | 3.10, 3.11 | 3.5 - 3.8
+1.2 | 2.2, 3.0, 3.1, 3.2 | 3.10, 3.11, 3.12 | 3.5 - 3.9
 
 
 ## Documentation / Browsable API
