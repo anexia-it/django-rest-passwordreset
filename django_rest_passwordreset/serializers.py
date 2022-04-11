@@ -18,7 +18,7 @@ __all__ = [
 
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()
 
 
 class PasswordValidateMixin:
