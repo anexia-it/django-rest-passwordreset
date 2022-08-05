@@ -2,6 +2,7 @@
 
 import django
 from django.db import migrations
+from django.db import utils
 
 
 def is_postgresql(schema_editor):
@@ -18,7 +19,10 @@ def get_db_table(apps):
 
 def execute_sql(schema_editor, sql):
     with schema_editor.connection.cursor() as cursor:
-        cursor.execute(sql)
+        try:
+            cursor.execute(sql)
+        except utils.OperationalError:
+            pass
 
 
 def forwards_func(apps, schema_editor):
