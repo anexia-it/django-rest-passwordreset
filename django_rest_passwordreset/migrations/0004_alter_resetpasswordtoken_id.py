@@ -38,15 +38,7 @@ def forwards_func(apps, schema_editor):
 
 
 def reverse_func(apps, schema_editor):
-    if not is_postgresql(schema_editor):
-        return
-
-    db_table = get_db_table(apps)
-    sql = """alter table {db_table}
-    alter column id drop identity;
-    """.format(db_table=db_table)
-
-    execute_sql(schema_editor, sql)
+    pass
 
 
 def get_migrations_based_on_django_version():
