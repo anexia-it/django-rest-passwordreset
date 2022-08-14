@@ -63,8 +63,8 @@ class ResetPasswordToken(models.Model):
         blank=True,
         null=True,
     )
-    user_agent = models.CharField(
-        max_length=256,
+    user_agent = models.TextField(
+        max_length=512,
         verbose_name=_("HTTP User Agent"),
         default="",
         blank=True,
