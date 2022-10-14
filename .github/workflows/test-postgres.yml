@@ -1,0 +1,81 @@
+name: Run tests on postgres
+on: [push, pull_request]
+
+jobs:
+  test:
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+        django-version:
+          - "3.2"
+          - "4.0"
+          - "4.1"
+        drf-version:
+          - "3.12"
+          - "3.13"
+        exclude:
+          - python-version: "3.7"
+            django-version: "4.0"
+          - python-version: "3.7"
+            django-version: "4.1"
+          - drf-version: "3.12"
+            django-version: "4.0"
+          - drf-version: "3.12"
+            django-version: "4.1"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install psycopg2-binary
+
+    - name: Install Django version
+      run: |
+        python -m pip install "Django==${{ matrix.django-version }}.*"
+
+    - name: Install DRF version
+      run: |
+        python -m pip install "djangorestframework==${{ matrix.drf-version }}.*"
+
+    - name: Python, Django and DRF versions
+      run: |
+        echo "Python ${{ matrix.python-version }} -> Django ${{ matrix.django-version }} -> DRF ${{ matrix.drf-version }}"
+        python --version
+        echo "Django: `django-admin --version`"
+        echo "DRF: `pip show djangorestframework|grep Version|sed s/Version:\ //`"
+
+    - name: Setup environment
+      run: |
+        pip install -e .
+        python setup.py install
+
+    - name: Run tests
+      working-directory: ./tests
+      run: python manage.py test --settings=settings_postgres
