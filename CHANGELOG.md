@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/project/django-rest-passwordreset/).
 
+## [Unreleased]
+
+- `pre_password_reset` and `post_password_reset` signals now provide `reset_password_token
+- Updated README test instructions
+
 ## [1.3.0]
 
 ### Added
