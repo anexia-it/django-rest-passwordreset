@@ -66,8 +66,8 @@ where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
-* ``pre_password_reset(sender, user)`` - fired just before a password is being reset
-* ``post_password_reset(sender, user)`` - fired after a password has been reset
+* ``pre_password_reset(sender, user, reset_password_token)`` - fired just before a password is being reset
+* ``post_password_reset(sender, user, reset_password_token)`` - fired after a password has been reset
 
 ### Example for sending an e-mail
 
@@ -382,11 +382,19 @@ This library tries to follow the unix philosophy of "do one thing and do it well
 See folder [tests/](tests/). Basically, all endpoints are covered with multiple
 unit tests.
 
-Use this code snippet to run tests:
+Follow below instructions to run the tests.
+You may exchange the installed Django and DRF versions according to your requirements. 
+:warning: Depending on your local environment settings you might need to explicitly call `python3` instead of `python`.
 ```bash
-python setup.py install
-cd tests
-python manage.py test
+# install dependencies
+python -m pip install --upgrade pip
+pip install -r tests/requirements.txt
+
+# setup environment
+pip install -e .
+
+# run tests
+cd tests && python manage.py test
 ```
 
 ## Release on PyPi

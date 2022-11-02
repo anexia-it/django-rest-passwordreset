@@ -321,7 +321,11 @@ class AuthTestCase(APITestCase, HelperMixin):
 
         # now the other two signals should have been called
         self.assertTrue(mock_post_password_reset.called)
+        self.assertIn('reset_password_token', mock_post_password_reset.call_args[1])
+        self.assertEqual(mock_post_password_reset.call_args[1]['reset_password_token'], token1)
         self.assertTrue(mock_pre_password_reset.called)
+        self.assertIn('reset_password_token', mock_pre_password_reset.call_args[1])
+        self.assertEqual(mock_pre_password_reset.call_args[1]['reset_password_token'], token1)
 
     @override_settings(DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE=True)
     def test_try_reset_password_email_does_not_exist_no_leakage_enabled(self):
