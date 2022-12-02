@@ -79,6 +79,10 @@ class ResetPasswordConfirm(GenericAPIView):
 
         # find token
         reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
+        if not reset_password_token:
+            # Check if token exists and raise a validation error for the serializer
+            # with a correct feedback
+            raise exceptions.ValidationError({'token': 'Invalid token'})
 
         # change users password (if we got to this code it means that the user is_active)
         if reset_password_token.user.eligible_for_reset():
