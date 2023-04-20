@@ -10,6 +10,7 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 
 - `pre_password_reset` and `post_password_reset` signals now provide `reset_password_token
 - Updated README test instructions
+- [BREAKING] Rename `clearresetpasswodtokens` command to `clear_reset_password_tokens`
 
 ## [1.3.0]
 
