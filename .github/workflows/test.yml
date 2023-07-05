@@ -19,6 +19,7 @@ jobs:
         drf-version:
           - "3.12"
           - "3.13"
+          - "3.14"
         exclude:
           - python-version: "3.7"
             django-version: "4.0"
