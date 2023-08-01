@@ -59,7 +59,16 @@ class ResetPasswordValidateToken(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response({'status': 'OK'})
+
+        return_data = {'status': 'OK'}
+
+        if getattr(settings, 'DJANGO_REST_PASSWORDRESET_USER_DETAILS_ON_VALIDATION', False):
+            token = ResetPasswordToken.objects.get(key=serializer.validated_data['token'])
+
+            return_data['username'] = token.user.username
+            return_data['email'] = token.user.email
+
+        return Response(return_data)
 
 
 class ResetPasswordConfirm(GenericAPIView):
