@@ -1,0 +1,68 @@
+# Translation to Brazilian Portuguese.
+# This file is distributed under the same license as the PACKAGE package.
+# Silas Vasconcelos <silasvasconcelos@hotmail.com.br>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-05-05 01:23-0300\n"
+"PO-Revision-Date: 2022-05-05 01:41-0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: django_rest_passwordreset/models.py:28
+msgid "Password Reset Token"
+msgstr "Token de redefinição de senha"
+
+#: django_rest_passwordreset/models.py:29
+msgid "Password Reset Tokens"
+msgstr "Tokens de redefinição de senha"
+
+#: django_rest_passwordreset/models.py:44
+msgid "The User which is associated to this password reset token"
+msgstr "O usuário que está associado a este token de redefinição de senha"
+
+#: django_rest_passwordreset/models.py:49
+msgid "When was this token generated"
+msgstr "Quando este token foi gerado"
+
+#: django_rest_passwordreset/models.py:54
+msgid "Key"
+msgstr "Chave"
+
+#: django_rest_passwordreset/models.py:61
+msgid "The IP address of this session"
+msgstr "O endereço IP desta sessão"
+
+#: django_rest_passwordreset/models.py:68
+msgid "HTTP User Agent"
+msgstr "O navegador do usuário"
+
+#: django_rest_passwordreset/serializers.py:36
+msgid "The OTP password entered is not valid. Please check and try again."
+msgstr ""
+"O Token de validação não é válido. Por favor verifique e tente "
+"novamente."
+
+#: django_rest_passwordreset/serializers.py:45
+msgid "The token has expired"
+msgstr "O token expirou"
+
+#: django_rest_passwordreset/serializers.py:50
+msgid "Password"
+msgstr "Senha"
+
+#: django_rest_passwordreset/views.py:149
+msgid ""
+"We couldn't find an account associated with that email. Please try a "
+"different e-mail address."
+msgstr ""
+"Não foi possível encontrar uma conta associada a esse e-mail. Tente um "
+"endereço de e-mail diferente."
