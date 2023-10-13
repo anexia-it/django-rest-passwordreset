@@ -43,20 +43,20 @@ def clear_expired_tokens():
 
 
 def generate_token_for_email(email, user_agent='', ip_address=''):
-    # find a user by email address (case insensitive search)
+    # find a user by email address (case-insensitive search)
     users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
 
     active_user_found = False
 
     # iterate over all users and check if there is any user that is active
-    # also check whether the password can be changed (is useable), as there could be users that are not allowed
+    # also check whether the password can be changed (is usable), as there could be users that are not allowed
     # to change their password (e.g., LDAP user)
     for user in users:
         if user.eligible_for_reset():
             active_user_found = True
             break
 
-    # No active user found, raise a validation error
+    # No active user found, raise a ValidationError
     # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
     if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
         raise exceptions.ValidationError({
@@ -68,10 +68,12 @@ def generate_token_for_email(email, user_agent='', ip_address=''):
     # and create a Reset Password Token and send a signal with the created token
     for user in users:
         if user.eligible_for_reset():
+            password_reset_tokens = user.password_reset_tokens.all()
+
             # check if the user already has a token
-            if user.password_reset_tokens.all().count() > 0:
+            if password_reset_tokens.count():
                 # yes, already has a token, re-use this token
-                return user.password_reset_tokens.all()[0]
+                return password_reset_tokens.first()
 
             # no token exists, generate a new token
             return ResetPasswordToken.objects.create(
