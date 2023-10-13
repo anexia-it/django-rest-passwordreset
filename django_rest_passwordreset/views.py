@@ -47,6 +47,60 @@ def _unicode_ci_compare(s1, s2):
     return normalized1.casefold() == normalized2.casefold()
 
 
+def clear_expired_tokens():
+    """
+    Delete all existing expired tokens
+    """
+    password_reset_token_validation_time = get_password_reset_token_expiry_time()
+
+    # datetime.now minus expiry hours
+    now_minus_expiry_time = timezone.now() - timedelta(hours=password_reset_token_validation_time)
+
+    # delete all tokens where created_at < now - 24 hours
+    clear_expired(now_minus_expiry_time)
+
+
+def generate_token_for_email(email, user_agent='', ip_address=''):
+    # find a user by email address (case-insensitive search)
+    users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
+
+    active_user_found = False
+
+    # iterate over all users and check if there is any user that is active
+    # also check whether the password can be changed (is usable), as there could be users that are not allowed
+    # to change their password (e.g., LDAP user)
+    for user in users:
+        if user.eligible_for_reset():
+            active_user_found = True
+            break
+
+    # No active user found, raise a ValidationError
+    # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
+    if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
+        raise exceptions.ValidationError({
+            'email': [_(
+                "We couldn't find an account associated with that email. Please try a different e-mail address.")],
+        })
+
+    # last but not least: iterate over all users that are active and can change their password
+    # and create a Reset Password Token and send a signal with the created token
+    for user in users:
+        if user.eligible_for_reset() and _unicode_ci_compare(email, getattr(user, get_password_reset_lookup_field())):
+            password_reset_tokens = user.password_reset_tokens.all()
+
+            # check if the user already has a token
+            if password_reset_tokens.count():
+                # yes, already has a token, re-use this token
+                return password_reset_tokens.first()
+
+            # no token exists, generate a new token
+            return ResetPasswordToken.objects.create(
+                user=user,
+                user_agent=user_agent,
+                ip_address=ip_address,
+            )
+
+
 class ResetPasswordValidateToken(GenericAPIView):
     """
     An Api View which provides a method to verify that a token is valid
@@ -128,61 +182,18 @@ class ResetPasswordRequestToken(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
 
-        # before we continue, delete all existing expired tokens
-        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+        clear_expired_tokens()
+        token = generate_token_for_email(
+            email=serializer.validated_data['email'],
+            user_agent=request.META.get(HTTP_USER_AGENT_HEADER, ''),
+            ip_address=request.META.get(HTTP_IP_ADDRESS_HEADER, ''),
+        )
 
-        # datetime.now minus expiry hours
-        now_minus_expiry_time = timezone.now() - timedelta(hours=password_reset_token_validation_time)
+        # send a signal that the password token was created
+        # let whoever receives this signal handle sending the email for the password reset
+        reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
 
-        # delete all tokens where created_at < now - 24 hours
-        clear_expired(now_minus_expiry_time)
-
-        # find a user by email address (case insensitive search)
-        users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
-
-        active_user_found = False
-
-        # iterate over all users and check if there is any user that is active
-        # also check whether the password can be changed (is useable), as there could be users that are not allowed
-        # to change their password (e.g., LDAP user)
-        for user in users:
-            if user.eligible_for_reset():
-                active_user_found = True
-                break
-
-        # No active user found, raise a validation error
-        # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
-        if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
-            raise exceptions.ValidationError({
-                'email': [_(
-                    "We couldn't find an account associated with that email. Please try a different e-mail address.")],
-            })
-
-        # last but not least: iterate over all users that are active and can change their password
-        # and create a Reset Password Token and send a signal with the created token
-        for user in users:
-            if user.eligible_for_reset() and \
-                    _unicode_ci_compare(email, getattr(user, get_password_reset_lookup_field())):
-                # define the token as none for now
-                token = None
-
-                # check if the user already has a token
-                if user.password_reset_tokens.all().count() > 0:
-                    # yes, already has a token, re-use this token
-                    token = user.password_reset_tokens.all()[0]
-                else:
-                    # no token exists, generate a new token
-                    token = ResetPasswordToken.objects.create(
-                        user=user,
-                        user_agent=request.META.get(HTTP_USER_AGENT_HEADER, ''),
-                        ip_address=request.META.get(HTTP_IP_ADDRESS_HEADER, ''),
-                    )
-                # send a signal that the password token was created
-                # let whoever receives this signal handle sending the email for the password reset
-                reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
-        # done
         return Response({'status': 'OK'})
 
 
