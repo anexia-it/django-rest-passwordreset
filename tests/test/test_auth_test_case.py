@@ -64,6 +64,10 @@ class AuthTestCase(APITestCase, HelperMixin):
         response = self.rest_do_validate_token(last_reset_password_token.key)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        # there should be no user details in the response
+        self.assertEqual(response.data.get("username"), None)
+        self.assertEqual(response.data.get("email"), None)
+
         # there should be one token
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
 
@@ -72,6 +76,31 @@ class AuthTestCase(APITestCase, HelperMixin):
             self.django_check_login("user1", "secret1"),
             msg="User 1 should still be able to login with the old credentials"
         )
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    @override_settings(DJANGO_REST_PASSWORDRESET_USER_DETAILS_ON_VALIDATION=True)
+    def test_validate_token_with_user_details(self, mock_reset_password_token_created):
+        """ Tests validate token with user details in the response """
+
+        # there should be zero tokens
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
+
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        last_reset_password_token = mock_reset_password_token_created.call_args[1]['reset_password_token']
+        self.assertNotEqual(last_reset_password_token.key, "")
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # try to validate token
+        response = self.rest_do_validate_token(last_reset_password_token.key)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # there should be user details in the response
+        self.assertEqual(response.data.get("username"), "user1")
+        self.assertEqual(response.data.get("email"), "user1@mail.com")
 
     def test_validate_bad_token(self):
         """ Tests validate an invalid token """
