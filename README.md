@@ -152,6 +152,17 @@ DJANGO_REST_LOOKUP_FIELD = 'custom_email_field'
 ```
 into Django settings.py file.
 
+## Configurable Response
+
+For optional configurable response messages, add the following properties to settings.py
+```python
+PASSWORD_CHANGED = 'Your password has been changed' 
+TOKEN_EXPIRED = 'Your token has expired'
+PASSWORD_REQUEST_ACCEPT = 'Please check your email for the reset password link'
+TOKEN_NOT_FOUND = 'Your token is invalid'
+TOKEN_VALID = 'Your token is valid'
+```
+
 ## Custom Remote IP Address and User Agent Header Lookup
 
 If your setup demands that the IP adress of the user is in another header (e.g., 'X-Forwarded-For'), you can configure that (using Django Request Headers):
@@ -372,6 +383,8 @@ Apparently, the following piece of code in the Django Model prevents MongodB fro
 ```
 
 See issue #49 for details.
+
+
 
 ## Contributions
 
