@@ -1,0 +1,66 @@
+# Translation to Brazilian Portuguese.
+# This file is distributed under the same license as the PACKAGE package.
+# Silas Vasconcelos <silasvasconcelos@hotmail.com.br>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-05-05 01:23-0300\n"
+"PO-Revision-Date: 2022-05-05 01:41-0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: django_rest_passwordreset/models.py:28
+msgid "Password Reset Token"
+msgstr "Token de réinitialisation du mot de passe"
+
+#: django_rest_passwordreset/models.py:29
+msgid "Password Reset Tokens"
+msgstr "Tokens de ré-initialisation des mot de passe"
+
+#: django_rest_passwordreset/models.py:44
+msgid "The User which is associated to this password reset token"
+msgstr "L'utilisateur associé au token de réinitialisation du mot de passe"
+
+#: django_rest_passwordreset/models.py:49
+msgid "When was this token generated"
+msgstr "Quand ce token a été généré"
+
+#: django_rest_passwordreset/models.py:54
+msgid "Key"
+msgstr "Clé"
+
+#: django_rest_passwordreset/models.py:61
+msgid "The IP address of this session"
+msgstr "L'adresse IP de cette session"
+
+#: django_rest_passwordreset/models.py:68
+msgid "HTTP User Agent"
+msgstr "Agent Utilisateur HTTP"
+
+#: django_rest_passwordreset/serializers.py:36
+msgid "The OTP password entered is not valid. Please check and try again."
+msgstr "Le mot de passe saisi est invalide."
+
+
+#: django_rest_passwordreset/serializers.py:45
+msgid "The token has expired"
+msgstr "Le token a expiré"
+
+#: django_rest_passwordreset/serializers.py:50
+msgid "Password"
+msgstr "Mot de passe"
+
+#: django_rest_passwordreset/views.py:149
+msgid ""
+"We couldn't find an account associated with that email. Please try a "
+"different e-mail address."
+msgstr ""
+"Nous n'avons pas trouvé de compte associé à cet email. Veuillez ré-essayer avec une adresse différente"
