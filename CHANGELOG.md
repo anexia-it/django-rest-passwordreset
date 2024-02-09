@@ -8,8 +8,22 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 
 ## [Unreleased]
 
+## [1.4.0]
+
+### Added
 - `pre_password_reset` and `post_password_reset` signals now provide `reset_password_token
-- Updated README test instructions
+- Add translations to Brazilian Portuguese
+- Possibility to return the username and email address when validating a token
+- Generating and clearing tokens programmatically 
+- Support for Python 3.11, 3.12
+- Support for Django 4.2, 5.0
+- Support for DRF 3.14
+
+### Changed
+- Increase max_length of user_agent to 512
+- Dropped support for Django 4.0, 4.1
+- Dropped support for DRF 3.12, 3.13
+- Dropped support for Python 3.7
 
 ## [1.3.0]
 
@@ -61,6 +75,7 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 ## [0.9.0]
 - Initial Release
 
+[1.4.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.1.0...1.2.0
