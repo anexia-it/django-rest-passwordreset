@@ -1,11 +1,14 @@
 import json
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.test import override_settings
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from django_rest_passwordreset.models import ResetPasswordToken
+from django_rest_passwordreset.models import ResetPasswordToken, get_password_reset_token_expiry_time
+from django_rest_passwordreset.views import clear_expired_tokens, generate_token_for_email
 from tests.test.helpers import HelperMixin, patch
 
 
@@ -71,7 +74,7 @@ class AuthTestCase(APITestCase, HelperMixin):
         # there should be one token
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
 
-        # try to login with the old username/password (should work)
+        # try to log in with the old username/password (should work)
         self.assertTrue(
             self.django_check_login("user1", "secret1"),
             msg="User 1 should still be able to login with the old credentials"
@@ -415,3 +418,41 @@ class AuthTestCase(APITestCase, HelperMixin):
             self.django_check_login("user4", "new_secret"),
             msg="User 4 should be able to login with the modified credentials"
         )
+
+    def test_clear_expired_tokens(self):
+        """ Tests clearance of expired tokens """
+
+        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+
+        # there should be zero tokens
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
+
+        # request a new token
+        response = self.rest_do_request_reset_token(email="user1@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+        # let the token expire
+        token = ResetPasswordToken.objects.all().first()
+        token.created_at = timezone.now() - timedelta(hours=password_reset_token_validation_time)
+        token.save()
+
+        # clear expired tokens
+        clear_expired_tokens()
+
+        # there should be zero tokens
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
+
+    def test_generate_token_for_email(self):
+        """ Tests generating tokens for a specific email address programmatically """
+
+        # there should be zero tokens
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
+
+        # request a new token
+        generate_token_for_email(email="user1@mail.com")
+
+        # there should be one token
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
