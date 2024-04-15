@@ -60,7 +60,7 @@ def clear_expired_tokens():
     clear_expired(now_minus_expiry_time)
 
 
-def generate_token_for_email(email, user_agent='', ip_address='') -> ResetPasswordToken | None:
+def generate_token_for_email(email, user_agent='', ip_address=''):
     # find a user by email address (case-insensitive search)
     users = User.objects.filter(**{'{}__iexact'.format(get_password_reset_lookup_field()): email})
 
