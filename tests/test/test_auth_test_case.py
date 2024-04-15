@@ -360,13 +360,15 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.assertEqual(mock_pre_password_reset.call_args[1]['reset_password_token'], token1)
 
     @override_settings(DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE=True)
-    def test_try_reset_password_email_does_not_exist_no_leakage_enabled(self):
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    def test_try_reset_password_email_does_not_exist_no_leakage_enabled(self, mock_reset_signal):
         """
         Tests requesting a token for an email that does not exist when
         DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
         """
         response = self.rest_do_request_reset_token(email="foobar@doesnotexist.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(mock_reset_signal.called)
 
     def test_user_without_password(self):
         """ Tests requesting a token for an email without a password doesn't work"""
