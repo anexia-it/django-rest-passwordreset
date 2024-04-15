@@ -75,12 +75,14 @@ def generate_token_for_email(email, user_agent='', ip_address=''):
             break
 
     # No active user found, raise a ValidationError
-    # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
-    if not active_user_found and not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
-        raise exceptions.ValidationError({
-            'email': [_(
-                "We couldn't find an account associated with that email. Please try a different e-mail address.")],
-        })
+    # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True, in that case we return None
+    if not active_user_found:
+        if not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
+            raise exceptions.ValidationError({
+                'email': [_(
+                    "We couldn't find an account associated with that email. Please try a different e-mail address.")],
+            })
+        return None
 
     # last but not least: iterate over all users that are active and can change their password
     # and create a Reset Password Token and send a signal with the created token
@@ -199,9 +201,13 @@ class ResetPasswordRequestToken(GenericAPIView):
             ip_address=request.META.get(HTTP_IP_ADDRESS_HEADER, ''),
         )
 
-        # send a signal that the password token was created
-        # let whoever receives this signal handle sending the email for the password reset
-        reset_password_token_created.send(sender=self.__class__, instance=self, reset_password_token=token)
+        if token:
+            # send a signal that the password token was created
+            # let whoever receives this signal handle sending the email for the password reset
+            reset_password_token_created.send(
+                sender=self.__class__,
+                instance=self, reset_password_token=token
+            )
 
         return Response({'status': 'OK'})
 
