@@ -8,6 +8,8 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 
 ## [Unreleased]
 
+## [1.4.1]
+
 ### Fixed
 - Fix the reset_password_token_created signal to be fired even when no token have been created. (#188)
 
@@ -78,6 +80,7 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 ## [0.9.0]
 - Initial Release
 
+[1.4.1]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.2.0...1.2.1
