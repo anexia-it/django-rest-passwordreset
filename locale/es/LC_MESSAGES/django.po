@@ -1,0 +1,66 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <jorgecorreaherrero@gmail.com>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-15 09:18+0000\n"
+"PO-Revision-Date: 2021-02-15 10:00+0000\n"
+"Last-Translator: jorge correa <jorgecorreaherrero@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:28
+msgid "Password Reset Token"
+msgstr "Clave para reestablecer la Contraseña"
+
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:29
+msgid "Password Reset Tokens"
+msgstr "Claves para reestablecer la contraseña"
+
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:44
+msgid "The User which is associated to this password reset token"
+msgstr "Usuario asociado a la clave para reestablecer la contraseña"
+
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:49
+msgid "When was this token generated"
+msgstr "Cuando fué generada la clave"
+
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:54
+msgid "Key"
+msgstr "Clave"
+
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:61
+msgid "The IP address of this session"
+msgstr "La dirección IP de esta sesión"
+
+#: django-rest-passwordreset/django_rest_passwordreset/models.py:68
+msgid "HTTP User Agent"
+msgstr "Agente de usuario HTTP"
+
+#: django-rest-passwordreset/django_rest_passwordreset/serializers.py:36
+msgid "The OTP password entered is not valid. Please check and try again."
+msgstr "La contraseña OTP introducida no es válida. Por favor compruebe y pruebe otra vez."
+
+#: django-rest-passwordreset/django_rest_passwordreset/serializers.py:45
+msgid "The token has expired"
+msgstr "La clave ha caducado"
+
+#: django-rest-passwordreset/django_rest_passwordreset/serializers.py:50
+msgid "Password"
+msgstr "Contraseña"
+
+#: django-rest-passwordreset/django_rest_passwordreset/views.py:130
+msgid ""
+"We couldn't find an account associated with that email. Please try a "
+"different e-mail address."
+msgstr ""
+"No pudimos encontrar una cuenta asociada con ese correo electrónico. "
+"Por favor Intente con otra dirección de correo electrónico"
