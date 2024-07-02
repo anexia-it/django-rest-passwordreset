@@ -11,6 +11,7 @@ from rest_framework import exceptions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.throttling import AnonRateThrottle
 
 from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, get_password_reset_token_expiry_time, \
     get_password_reset_lookup_field
@@ -103,6 +104,14 @@ def generate_token_for_email(email, user_agent='', ip_address=''):
             )
 
 
+class CustomResetPasswordThrottle(AnonRateThrottle):
+    rate = '3/day'  # Adjust this rate as needed
+
+    def get_cache_key(self, request, view):
+        # Use IP address for throttling to prevent abuse
+        return self.get_ident(request)
+
+
 class ResetPasswordValidateToken(GenericAPIView):
     """
     An Api View which provides a method to verify that a token is valid
@@ -185,7 +194,7 @@ class ResetPasswordRequestToken(GenericAPIView):
 
     Sends a signal reset_password_token_created when a reset token was created
     """
-    throttle_classes = ()
+    throttle_classes = (CustomResetPasswordThrottle,)
     permission_classes = ()
     serializer_class = EmailSerializer
     authentication_classes = ()
