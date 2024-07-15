@@ -99,7 +99,7 @@ def generate_token_for_email(email, user_agent='', ip_address=''):
             return ResetPasswordToken.objects.create(
                 user=user,
                 user_agent=user_agent,
-                ip_address=ip_address,
+                ip_address=ip_address.split(",")[0],
             )
 
 

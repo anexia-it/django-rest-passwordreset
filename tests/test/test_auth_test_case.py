@@ -447,6 +447,19 @@ class AuthTestCase(APITestCase, HelperMixin):
         # there should be zero tokens
         self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
 
+    def test_generate_token_for_email_with_multiple_ip_address(self):
+        """
+        Test generating tokens with multiple ip address will keep only the first
+        one to match inet type
+        https://www.postgresql.org/docs/current/datatype-net-types.html#DATATYPE-INET
+        https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For#syntax
+        """
+        # request a new token with multiple ips
+        generate_token_for_email(email="user1@mail.com", ip_address="1.1.1.1, 2.2.2.2")
+
+        # there should be one token with only the first ip adress
+        self.assertEqual(ResetPasswordToken.objects.get().ip_address, "1.1.1.1")
+
     def test_generate_token_for_email(self):
         """ Tests generating tokens for a specific email address programmatically """
 
