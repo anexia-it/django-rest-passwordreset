@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework import status
@@ -10,6 +10,8 @@ from rest_framework.test import APITestCase
 from django_rest_passwordreset.models import ResetPasswordToken, get_password_reset_token_expiry_time
 from django_rest_passwordreset.views import clear_expired_tokens, generate_token_for_email
 from tests.test.helpers import HelperMixin, patch
+
+User = get_user_model()
 
 
 class AuthTestCase(APITestCase, HelperMixin):

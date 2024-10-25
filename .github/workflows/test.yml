@@ -72,6 +72,7 @@ jobs:
         # prepare Django project: link all necessary data from the test project into the root directory
         # Hint: Simply changing the directory does not work (leads to missing files in coverage report)
         ln -s ./tests/test test
+        ln -s ./tests/user_id_uuid_testapp user_id_uuid_testapp
         ln -s ./tests/manage.py manage.py
         ln -s ./tests/settings.py settings.py
         ln -s ./tests/urls.py urls.py
