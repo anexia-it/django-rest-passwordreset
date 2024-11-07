@@ -257,6 +257,20 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 ```
 
 
+### Throttling
+
+The endpoint to request a reset password token provides throttling.
+Per default the throttling rate is `3/day` per IP address.
+
+The throttling rate can be customized using the `REST_FRAMEWORK` setting and the scope `"django-rest-passwordreset-request-token"`:
+
+```
+REST_FRAMEWORK = {"DEFAULT_THROTTLE_RATES": {"django-rest-passwordreset-request-token": "5/hour"}}
+```
+
+See also: https://www.django-rest-framework.org/api-guide/throttling/#setting-the-throttling-policy
+
+
 ## Compatibility Matrix
 
 This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
