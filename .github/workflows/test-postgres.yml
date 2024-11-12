@@ -1,8 +1,22 @@
-name: Run linter and tests
+name: Run tests on postgres
 on: [push, pull_request]
 
 jobs:
   test:
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,14 +50,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 codecov setuptools
-
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        python -m pip install psycopg[binary] setuptools
 
     - name: Install Django version
       run: |
@@ -66,18 +73,5 @@ jobs:
         python setup.py install
 
     - name: Run tests
-      run: |
-        # prepare Django project: link all necessary data from the test project into the root directory
-        # Hint: Simply changing the directory does not work (leads to missing files in coverage report)
-        ln -s ./tests/test test
-        ln -s ./tests/user_id_uuid_testapp user_id_uuid_testapp
-        ln -s ./tests/manage.py manage.py
-        ln -s ./tests/settings.py settings.py
-        ln -s ./tests/urls.py urls.py
-
-        # run tests with coverage
-        coverage run --source='./django_rest_passwordreset' manage.py test
-        coverage xml
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      working-directory: ./tests
+      run: python manage.py test --settings=settings_postgres

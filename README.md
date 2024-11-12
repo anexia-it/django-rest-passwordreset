@@ -1,7 +1,7 @@
 # Django Rest Password Reset
 
 [![PyPI version](https://img.shields.io/pypi/v/django-rest-passwordreset.svg)](https://pypi.org/project/django-rest-passwordreset/)
-[![build-and-test actions status](https://github.com/anexia-it/django-rest-passwordreset/workflows/build-and-test/badge.svg)](https://github.com/anexia-it/django-rest-passwordreset/actions)
+[![build-and-test actions status](https://github.com/anexia-it/django-rest-passwordreset/actions/workflows/test.yml/badge.svg)](https://github.com/anexia-it/django-rest-passwordreset/actions)
 [![Codecov](https://img.shields.io/codecov/c/gh/anexia-it/django-rest-passwordreset)](https://codecov.io/gh/anexia-it/django-rest-passwordreset)
 
 This python package provides a simple password reset strategy for django rest framework, where users can request password 
@@ -42,32 +42,32 @@ python manage.py migrate
 
 4. This package provides three endpoints, which can be included by including ``django_rest_passwordreset.urls`` in your ``urls.py`` as follows:
 ```python
-from django.conf.urls import url, include
-
+from django.urls import path, include
 
 urlpatterns = [
     ...
-    url(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path(r'^api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     ...
 ]
 ```
-**Note**: You can adapt the url to your needs.
+**Note**: You can adapt the URL to your needs.
 
 ### Endpoints
 
 The following endpoints are provided:
 
- * `POST ${API_URL}/reset_password/` - request a reset password token by using the ``email`` parameter
- * `POST ${API_URL}/reset_password/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
- * `POST ${API_URL}/reset_password/validate_token/` - will return a 200 if a given ``token`` is valid
+ * `POST ${API_URL}/` - request a reset password token by using the ``email`` parameter
+ * `POST ${API_URL}/confirm/` - using a valid ``token``, the users password is set to the provided ``password``
+ * `POST ${API_URL}/validate_token/` - will return a 200 if a given ``token`` is valid
  
-where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/` as in the example above)
+where `${API_URL}/` is the url specified in your *urls.py* (e.g., `api/password_reset/` as in the example above)
+
  
 ### Signals
 
 * ``reset_password_token_created(sender, instance, reset_password_token)`` Fired when a reset password token is generated
-* ``pre_password_reset(sender, user)`` - fired just before a password is being reset
-* ``post_password_reset(sender, user)`` - fired after a password has been reset
+* ``pre_password_reset(sender, user, reset_password_token)`` - fired just before a password is being reset
+* ``post_password_reset(sender, user, reset_password_token)`` - fired after a password has been reset
 
 ### Example for sending an e-mail
 
@@ -132,7 +132,7 @@ If you want to test this locally, I recommend using some kind of fake mailserver
 
 # Configuration / Settings
 
-The following settings can be set in Djangos ``settings.py`` file:
+The following settings can be set in Django ``settings.py`` file:
 
 * `DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME` - time in hours about how long the token is active (Default: 24)
 
@@ -163,7 +163,7 @@ DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER = 'HTTP_X_FORWARDED_FOR'
 The same is true for the user agent:
 
 ```python
-HTTP_USER_AGENT_HEADER = 'HTTP_USER_AGENT'
+DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER = 'HTTP_USER_AGENT'
 ```
 
 ## Custom Token Generator
@@ -262,17 +262,52 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 This library should be compatible with the latest Django and Django Rest Framework Versions. For reference, here is
 a matrix showing the guaranteed and tested compatibility.
 
-django-rest-passwordreset Version | Django Versions | Django Rest Framework Versions | Python |
---------------------------------- | --------------- | ------------------------------ | ------ |
+django-rest-passwordreset Version | Django Versions     | Django Rest Framework Versions | Python |
+--------------------------------- |---------------------| ------------------------------ | ------ |
 0.9.7 | 1.8, 1.11, 2.0, 2.1 | 3.6 - 3.9 | 2.7
 1.0 | 1.11, 2.0, 2.2 | 3.6 - 3.9 | 2.7
 1.1 | 1.11, 2.2 | 3.6 - 3.9 | 2.7
 1.2 | 2.2, 3.0, 3.1 | 3.10, 3.11 | 3.5 - 3.8
-
+1.3 | 3.2, 4.0, 4.1 | 3.12, 3.13, 3.14 | 3.7 - 3.10
+1.4 | 3.2, 4.2, 5.0 | 3.13, 3.14 | 3.8 - 3.12
+1.5 | 4.2, 5.0, 5.1 | 3.15 | 3.9 - 3.13
 
 ## Documentation / Browsable API
 
 This package supports the [DRF auto-generated documentation](https://www.django-rest-framework.org/topics/documenting-your-api/) (via `coreapi`) as well as the [DRF browsable API](https://www.django-rest-framework.org/topics/browsable-api/).
+
+To add the endpoints to the browsable API, you can use a helper function in your `urls.py` file:
+```python
+from rest_framework.routers import DefaultRouter
+from django_rest_passwordreset.urls import add_reset_password_urls_to_router
+
+router = DefaultRouter()
+add_reset_password_urls_to_router(router, base_path='api/auth/passwordreset')
+```
+
+Alternatively you can import the ViewSets manually and customize the routes for your setup:
+```python
+from rest_framework.routers import DefaultRouter
+from django_rest_passwordreset.views import ResetPasswordValidateTokenViewSet, ResetPasswordConfirmViewSet, \
+    ResetPasswordRequestTokenViewSet
+
+router = DefaultRouter()
+router.register(
+    r'api/auth/passwordreset/validate_token',
+    ResetPasswordValidateTokenViewSet,
+    basename='reset-password-validate'
+)
+router.register(
+    r'api/auth/passwordreset/confirm',
+    ResetPasswordConfirmViewSet,
+    basename='reset-password-confirm'
+)
+router.register(
+    r'api/auth/passwordreset/',
+    ResetPasswordRequestTokenViewSet,
+    basename='reset-password-request'
+)
+```
 
 ![drf_browsable_email_validation](docs/browsable_api_email_validation.png "Browsable API E-Mail Validation")
 
@@ -348,11 +383,19 @@ This library tries to follow the unix philosophy of "do one thing and do it well
 See folder [tests/](tests/). Basically, all endpoints are covered with multiple
 unit tests.
 
-Use this code snippet to run tests:
+Follow below instructions to run the tests.
+You may exchange the installed Django and DRF versions according to your requirements. 
+:warning: Depending on your local environment settings you might need to explicitly call `python3` instead of `python`.
 ```bash
-python setup.py install
-cd tests
-python manage.py test
+# install dependencies
+python -m pip install --upgrade pip
+pip install -r tests/requirements.txt
+
+# setup environment
+pip install -e .
+
+# run tests
+cd tests && python manage.py test
 ```
 
 ## Release on PyPi
