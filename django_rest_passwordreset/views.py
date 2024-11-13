@@ -16,6 +16,7 @@ from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, 
     get_password_reset_lookup_field
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, ResetTokenSerializer
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
+from django_rest_passwordreset.throttling import ResetPasswordRequestTokenThrottle
 
 User = get_user_model()
 
@@ -185,7 +186,7 @@ class ResetPasswordRequestToken(GenericAPIView):
 
     Sends a signal reset_password_token_created when a reset token was created
     """
-    throttle_classes = ()
+    throttle_classes = (ResetPasswordRequestTokenThrottle,)
     permission_classes = ()
     serializer_class = EmailSerializer
     authentication_classes = ()
