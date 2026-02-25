@@ -11,7 +11,9 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='django-rest-passwordreset',
     version=os.getenv('PACKAGE_VERSION', '0.0.0').replace('refs/tags/', ''),
-    packages=find_packages(),
+    # Exclude the local test suite from distribution packages to avoid
+    # shadowing consumers' own `tests` modules after installation.
+    packages=find_packages(exclude=('tests', 'tests.*')),
     include_package_data=True,
     license='BSD License',
     description='An extension of django rest framework, providing a configurable password reset strategy',
