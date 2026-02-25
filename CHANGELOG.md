@@ -19,6 +19,9 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 - Updated CI/CD pipelines to test currently supported Django/Python combinations
 - Updated PostgreSQL test service to version 14 (required by Django 5.2)
 
+### Fixed
+- Excluded the library's `tests` package from installation to prevent import shadowing (for example `ModuleNotFoundError: No module named 'tests.plugins'` in consumer projects using pytest).
+
 ## [1.5.0]
 
 - Added Python 3.13 support
