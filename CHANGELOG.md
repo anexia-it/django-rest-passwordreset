@@ -8,6 +8,17 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 
 ## [Unreleased]
 
+### Added
+- Added Python 3.14 support
+- Added Django 5.2 LTS support
+- Added Django 6.0 support
+- Added Django Rest Framework 3.16 support
+
+### Changed
+- Removed Django 4.2 and 5.1 from the supported/tested matrix
+- Updated CI/CD pipelines to test currently supported Django/Python combinations
+- Updated PostgreSQL test service to version 14 (required by Django 5.2)
+
 ## [1.5.0]
 
 - Added Python 3.13 support
