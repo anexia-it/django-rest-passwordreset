@@ -171,6 +171,7 @@ class ResetPasswordConfirm(GenericAPIView):
             post_password_reset.send(
                 sender=self.__class__,
                 user=reset_password_token.user,
+                instance = self, # instance should have in the post password reset 
                 reset_password_token=reset_password_token,
             )
 
