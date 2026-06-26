@@ -13,9 +13,19 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 - Added Django 5.2 LTS support
 - Added Django 6.0 support
 - Added Django Rest Framework 3.16 support
+- Added `DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES` to replace the request-token endpoint throttle
+  classes. The default remains `ResetPasswordRequestTokenThrottle`; setting it to an empty list
+  delegates the request-token endpoint to DRF's global `DEFAULT_THROTTLE_CLASSES`.
 
 ### Security
 
+- The token-validation and password-confirm endpoints no longer declare `throttle_classes = ()`, so
+  an operator's global `REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"]` is now respected on those flows.
+  Previously, the empty-tuple declaration silently overrode global throttle configuration on these
+  security-critical endpoints (CWE-307 / CWE-799). The request-token endpoint retains the library's
+  `ResetPasswordRequestTokenThrottle` and built-in `3/day` fallback. This enables configured global
+  throttles for token validation and password confirmation; it does not add a new built-in throttle
+  to those endpoints.
 - The reset-token request endpoint (`POST .../reset_password/`) no longer exposes whether an
   account exists via HTTP status or response body. Previously, by default, a request for a
   non-existent (or inactive / no-usable-password) account returned HTTP 400 with an `email` error,
@@ -35,6 +45,15 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
   Clients that rendered UI based on the previous 400 response for unknown emails will now always receive 200.
   Set `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = False` to temporarily restore the legacy behavior
   (deprecated).
+- **Breaking:** Global DRF throttles now apply to the token-validation and password-confirm endpoints.
+  Deployments that configure `REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"]` may now receive HTTP 429 from
+  those endpoints where earlier versions bypassed the global throttles. For `ScopedRateThrottle`, the
+  endpoint scopes are `django-rest-passwordreset-validate-token` and
+  `django-rest-passwordreset-confirm`. If the request-token endpoint is delegated to global throttles
+  with `DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES = []`, its scope is
+  `django-rest-passwordreset-request-token`. Any active `ScopedRateThrottle` scope must have a matching
+  `REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]` entry; otherwise the affected endpoint raises
+  `ImproperlyConfigured` (HTTP 500).
 - Removed Django 4.2 and 5.1 from the supported/tested matrix
 - Updated CI/CD pipelines to test currently supported Django/Python combinations
 - Updated PostgreSQL test service to version 14 (required by Django 5.2)
