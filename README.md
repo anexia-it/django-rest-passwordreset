@@ -237,19 +237,29 @@ It uses `os.urandom()` to generate a good random string.
    
 
 ### RandomNumberTokenGenerator
+
+> **Security warning:** Numeric tokens have a much smaller search space than the default string
+> tokens. The default range (`10000`–`99999`, about 90,000 values) can be exhausted in roughly a day
+> at one guess per second against the token-validation or password-confirm endpoint, and faster
+> without effective throttling. Use `RandomNumberTokenGenerator` only when numeric reset codes are
+> required. If you use it, choose a large range and throttle validate/confirm (see
+> [Throttling](#throttling)). For most deployments, `RandomStringTokenGenerator` remains the safer
+> default.
+
 ```python
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": "django_rest_passwordreset.tokens.RandomNumberTokenGenerator"
 }
 ```
 
-You can configure the minimum and maximum number as follows:
+Configure the minimum and maximum value as follows. This example produces 10-digit numeric tokens
+with about 9 billion possible values; use it together with validate/confirm throttling:
 ```python
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": "django_rest_passwordreset.tokens.RandomNumberTokenGenerator",
     "OPTIONS": {
-        "min_number": 1500,
-        "max_number": 9999
+        "min_number": 1000000000,
+        "max_number": 9999999999
     }
 }
 ```

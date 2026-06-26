@@ -72,6 +72,14 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 class RandomNumberTokenGenerator(BaseTokenGenerator):
     """
     Generates a random number using random.SystemRandom() (which uses urandom in the background)
+
+    .. warning::
+        Numeric tokens have a much smaller search space than the default string tokens. The default
+        range (10000-99999, about 90,000 values) can be exhausted in roughly a day at one guess per
+        second against the validate/confirm endpoints, and faster without effective throttling.
+        Prefer ``RandomStringTokenGenerator`` unless numeric reset codes are required. If you use
+        numeric tokens, set a large ``min_number``/``max_number`` range and throttle the
+        validate/confirm endpoints. See the README "RandomNumberTokenGenerator" section.
     """
     def __init__(self, min_number=10000, max_number=99999, *args, **kwargs):
         self.min_number = min_number

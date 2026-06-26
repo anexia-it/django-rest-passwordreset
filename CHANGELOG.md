@@ -25,6 +25,11 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 
 ### Security
 
+- Documented a security warning for `RandomNumberTokenGenerator`: the default 5-digit numeric range
+  has only about 90,000 possible values and can be brute-forced in roughly a day at one guess per
+  second against the validate/confirm endpoints. The README example now uses a much larger numeric
+  range, and a warning was added to the class docstring. `RandomStringTokenGenerator` remains the
+  safer default.
 - The token-validation and password-confirm endpoints no longer declare `throttle_classes = ()`, so
   an operator's global `REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"]` is now respected on those flows.
   Previously, the empty-tuple declaration silently overrode global throttle configuration on these
