@@ -16,7 +16,7 @@ from django_rest_passwordreset.models import ResetPasswordToken, clear_expired, 
     get_password_reset_lookup_field
 from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer, ResetTokenSerializer
 from django_rest_passwordreset.signals import reset_password_token_created, pre_password_reset, post_password_reset
-from django_rest_passwordreset.throttling import ResetPasswordRequestTokenThrottle
+from django_rest_passwordreset.throttling import get_password_reset_request_token_throttle_classes
 
 User = get_user_model()
 
@@ -117,10 +117,10 @@ class ResetPasswordValidateToken(GenericAPIView):
     """
     An Api View which provides a method to verify that a token is valid
     """
-    throttle_classes = ()
     permission_classes = ()
     serializer_class = ResetTokenSerializer
     authentication_classes = ()
+    throttle_scope = 'django-rest-passwordreset-validate-token'
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -141,10 +141,10 @@ class ResetPasswordConfirm(GenericAPIView):
     """
     An Api View which provides a method to reset a password based on a unique token
     """
-    throttle_classes = ()
     permission_classes = ()
     serializer_class = PasswordTokenSerializer
     authentication_classes = ()
+    throttle_scope = 'django-rest-passwordreset-confirm'
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -195,10 +195,17 @@ class ResetPasswordRequestToken(GenericAPIView):
 
     Sends a signal reset_password_token_created when a reset token was created
     """
-    throttle_classes = (ResetPasswordRequestTokenThrottle,)
     permission_classes = ()
     serializer_class = EmailSerializer
     authentication_classes = ()
+    # Used when DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES delegates to ScopedRateThrottle.
+    throttle_scope = 'django-rest-passwordreset-request-token'
+
+    def get_throttles(self):
+        return [
+            throttle_class()
+            for throttle_class in get_password_reset_request_token_throttle_classes()
+        ]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

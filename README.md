@@ -265,15 +265,66 @@ class RandomStringTokenGenerator(BaseTokenGenerator):
 ### Throttling
 
 The endpoint to request a reset password token provides throttling.
-Per default the throttling rate is `3/day` per IP address.
+Per default the throttling rate is `3/day` per IP address, applied via the library's
+`ResetPasswordRequestTokenThrottle` (a DRF `UserRateThrottle` scoped to
+`"django-rest-passwordreset-request-token"`).
 
-The throttling rate can be customized using the `REST_FRAMEWORK` setting and the scope `"django-rest-passwordreset-request-token"`:
+The throttling rate can be customized using the `REST_FRAMEWORK` setting and the scope
+`"django-rest-passwordreset-request-token"`:
 
 ```
 REST_FRAMEWORK = {"DEFAULT_THROTTLE_RATES": {"django-rest-passwordreset-request-token": "5/hour"}}
 ```
 
+The request-token throttle classes can also be replaced:
+
+```
+DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES = [
+    "rest_framework.throttling.AnonRateThrottle",
+]
+```
+
+By default, this setting is unset and the endpoint uses `ResetPasswordRequestTokenThrottle`. Setting
+`DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES = []` delegates the request-token endpoint to DRF's global
+`DEFAULT_THROTTLE_CLASSES` instead. If you do this, configure an equivalent global throttle; otherwise
+you remove the built-in `3/day` request-token protection. For `ScopedRateThrottle`, the request-token
+scope is `"django-rest-passwordreset-request-token"`.
+
+The token-validation and password-confirm endpoints do not declare their own `throttle_classes`, so
+an operator's `REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"]` is respected for those endpoints. In earlier
+versions, those endpoints declared `throttle_classes = ()` and silently bypassed global throttles.
+
+The request-token endpoint is intentionally different by default: it uses its configured
+`DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES`, so global `DEFAULT_THROTTLE_CLASSES` do not additionally
+stack on that endpoint unless you set `DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES = []`.
+
+For example, to use DRF's scoped throttling for all three password-reset endpoints:
+
+```
+DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES = []
+
+REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "django-rest-passwordreset-request-token": "5/hour",
+        "django-rest-passwordreset-validate-token": "60/minute",
+        "django-rest-passwordreset-confirm": "10/hour",
+    },
+}
+```
+
+When `ScopedRateThrottle` is active on any password-reset endpoint, every active scope must have a
+matching entry in `DEFAULT_THROTTLE_RATES`. Omitting a rate for
+`django-rest-passwordreset-request-token`, `django-rest-passwordreset-validate-token`, or
+`django-rest-passwordreset-confirm` causes the affected endpoint to raise `ImproperlyConfigured`
+(HTTP 500).
+
 See also: https://www.django-rest-framework.org/api-guide/throttling/#setting-the-throttling-policy
+
+If you use `AnonRateThrottle` or `UserRateThrottle` globally, configure the standard DRF `anon` and
+`user` rates instead.
 
 
 ## Compatibility Matrix
