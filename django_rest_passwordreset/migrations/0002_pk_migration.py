@@ -9,9 +9,9 @@ import django.db.models.deletion
 
 def populate_auto_incrementing_pk_field(apps, schema_editor):
     ResetPasswordToken = apps.get_model('django_rest_passwordreset', 'ResetPasswordToken')
-
+    db_alias = schema_editor.connection.alias
     # Generate values for the new id column
-    for i, o in enumerate(ResetPasswordToken.objects.all()):
+    for i, o in enumerate(ResetPasswordToken.objects.using(db_alias).all()):
         o.id = i + 1
         o.save()
 
