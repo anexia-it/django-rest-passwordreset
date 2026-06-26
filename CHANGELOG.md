@@ -49,6 +49,9 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
   - Note: a residual timing side channel remains (the existing-account path performs a DB write and
     fires `reset_password_token_created`, which often triggers an SMTP send). The response-status
     oracle is closed; the timing channel is not. A future hardening pass may equalize the two paths.
+- The token-validation and password-confirm endpoints now use the same generic HTTP 404 response for
+  missing, malformed, expired, and ineligible-user tokens. Expired tokens are still deleted when
+  presented, but the response no longer reveals whether the token existed or why it failed.
 
 ### Changed
 
@@ -65,6 +68,10 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
   `django-rest-passwordreset-request-token`. Any active `ScopedRateThrottle` scope must have a matching
   `REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]` entry; otherwise the affected endpoint raises
   `ImproperlyConfigured` (HTTP 500).
+- **Breaking:** Token failure responses on validate/confirm are less specific. Expired tokens now
+  return the generic invalid-token 404 response instead of `"The token has expired"`. Confirming a
+  valid token whose user is inactive or otherwise ineligible now returns HTTP 404 instead of HTTP 200
+  and does not consume the token.
 - Removed Django 4.2 and 5.1 from the supported/tested matrix
 - Updated CI/CD pipelines to test currently supported Django/Python combinations
 - Updated PostgreSQL test service to version 14 (required by Django 5.2)

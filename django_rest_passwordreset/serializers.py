@@ -16,6 +16,8 @@ __all__ = [
     'ResetTokenSerializer',
 ]
 
+INVALID_TOKEN_ERROR = _("The OTP password entered is not valid. Please check and try again.")
+
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -33,7 +35,7 @@ class PasswordValidateMixin:
             reset_password_token = _get_object_or_404(models.ResetPasswordToken, key=token)
         except (TypeError, ValueError, ValidationError, Http404,
                 models.ResetPasswordToken.DoesNotExist):
-            raise Http404(_("The OTP password entered is not valid. Please check and try again."))
+            raise Http404(INVALID_TOKEN_ERROR)
 
         # check expiry date
         expiry_date = reset_password_token.created_at + timedelta(
@@ -42,7 +44,7 @@ class PasswordValidateMixin:
         if timezone.now() > expiry_date:
             # delete expired token
             reset_password_token.delete()
-            raise Http404(_("The token has expired"))
+            raise Http404(INVALID_TOKEN_ERROR)
         return data
 
 

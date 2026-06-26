@@ -489,3 +489,96 @@ class AuthTestCase(APITestCase, HelperMixin):
 
         # there should be one token
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+
+class ResponseIndistinguishabilityTestCase(APITestCase, HelperMixin):
+    """ Tests reset-token responses that should not expose token state. """
+
+    def setUp(self):
+        self.setUpUrls()
+        self.user_active = User.objects.create_user("active_user", "active@mail.com", "secret_active")
+        self.user_inactive = User.objects.create_user("inactive_user", "inactive@mail.com", "secret_inactive")
+        self.user_inactive.is_active = False
+        self.user_inactive.save()
+
+    def _request_token(self):
+        response = self.rest_do_request_reset_token(email="active@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return ResetPasswordToken.objects.get(user=self.user_active)
+
+    def _expire_token(self, token):
+        token.created_at = timezone.now() - timedelta(hours=get_password_reset_token_expiry_time() + 1)
+        token.save()
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    def test_validate_missing_and_expired_tokens_return_same_response(self, mock_reset_signal):
+        """ Tests validate returns the same response for missing and expired tokens """
+        response_missing = self.rest_do_validate_token("this-token-does-not-exist")
+        self.assertEqual(response_missing.status_code, status.HTTP_404_NOT_FOUND)
+
+        token = self._request_token()
+        self._expire_token(token)
+        response_expired = self.rest_do_validate_token(token.key)
+        self.assertEqual(response_expired.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.assertEqual(
+            response_missing.content,
+            response_expired.content,
+            msg="validate must return identical bodies for non-existent vs expired tokens",
+        )
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    def test_confirm_missing_and_expired_tokens_return_same_response(self, mock_reset_signal):
+        """ Tests confirm returns the same response for missing and expired tokens """
+        response_missing = self.rest_do_reset_password_with_token("this-token-does-not-exist", "NewStrongPassword1!")
+        self.assertEqual(response_missing.status_code, status.HTTP_404_NOT_FOUND)
+
+        token = self._request_token()
+        self._expire_token(token)
+        response_expired = self.rest_do_reset_password_with_token(token.key, "NewStrongPassword1!")
+        self.assertEqual(response_expired.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.assertEqual(
+            response_missing.content,
+            response_expired.content,
+            msg="confirm must return identical bodies for non-existent vs expired tokens",
+        )
+
+    def test_confirm_inactive_user_token_returns_404_without_deleting_token(self):
+        """ Tests confirm rejects tokens for inactive users without deleting them """
+        response_missing = self.rest_do_reset_password_with_token("this-token-does-not-exist", "NewStrongPassword1!")
+        self.assertEqual(response_missing.status_code, status.HTTP_404_NOT_FOUND)
+
+        token = ResetPasswordToken.objects.create(user=self.user_inactive)
+        self.assertEqual(ResetPasswordToken.objects.filter(pk=token.pk).count(), 1)
+
+        response = self.rest_do_reset_password_with_token(token.key, "NewStrongPassword1!")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.content, response_missing.content)
+
+        self.assertEqual(
+            ResetPasswordToken.objects.filter(pk=token.pk).count(),
+            1,
+            msg="confirm must not delete a token presented for an inactive user",
+        )
+
+    @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[
+            {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+        ]
+    )
+    def test_confirm_weak_password_returns_400_without_deleting_token(self, mock_reset_signal):
+        """ Tests weak password returns a password error and keeps the token """
+        token = self._request_token()
+
+        weak_response = self.rest_do_reset_password_with_token(token.key, "1")
+        self.assertEqual(weak_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.assertEqual(
+            ResetPasswordToken.objects.filter(pk=token.pk).count(),
+            1,
+            msg="confirm with a weak password must not consume the token",
+        )
+        body = json.loads(weak_response.content.decode())
+        self.assertIn("password", body)
