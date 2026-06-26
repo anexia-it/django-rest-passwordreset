@@ -16,6 +16,12 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 - Added `DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES` to replace the request-token endpoint throttle
   classes. The default remains `ResetPasswordRequestTokenThrottle`; setting it to an empty list
   delegates the request-token endpoint to DRF's global `DEFAULT_THROTTLE_CLASSES`.
+- Added a database index on `ResetPasswordToken.created_at` so expired-token cleanup
+  (`clearresetpasswodtokens` and the request-token endpoint's `clear_expired_tokens`) can use an
+  indexed range filter before deleting matching rows. Documented scheduling the
+  `clearresetpasswodtokens` management command (cron, Celery beat, or django-future-tasks) as the
+  recommended way to keep the token table small; the validate/confirm endpoints intentionally do not
+  run bulk cleanup.
 
 ### Security
 
