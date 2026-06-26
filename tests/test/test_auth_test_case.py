@@ -28,12 +28,16 @@ class AuthTestCase(APITestCase, HelperMixin):
         self.user5 = User.objects.create_user("user5", "uѕer5@mail.com", "secret5")  # email contains kyrillic s
 
     def test_try_reset_password_email_does_not_exist(self):
-        """ Tests requesting a token for an email that does not exist """
+        """ Tests requesting a token for an email that does not exist returns a generic 200 (no oracle) """
+        # By default, a non-existent account returns 200 OK, identical to the response for an
+        # existing account, so the endpoint does not expose existence via status or response body.
         response = self.rest_do_request_reset_token(email="foobar@doesnotexist.com")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         decoded_response = json.loads(response.content.decode())
-        # response should have "email" in it
-        self.assertTrue("email" in decoded_response)
+        # no account-specific error details should be present in the body
+        self.assertFalse("email" in decoded_response)
+        # and no token should have been created
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
 
     def test_unicode_email_reset(self):
         response = self.rest_do_request_reset_token(email="uѕer5@mail.com")
@@ -365,20 +369,32 @@ class AuthTestCase(APITestCase, HelperMixin):
     @patch('django_rest_passwordreset.signals.reset_password_token_created.send')
     def test_try_reset_password_email_does_not_exist_no_leakage_enabled(self, mock_reset_signal):
         """
-        Tests requesting a token for an email that does not exist when
-        DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True
+        Tests requesting a token for an email that does not exist returns 200 OK
+        when DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True (explicit opt-in
+        to the default behavior).
         """
         response = self.rest_do_request_reset_token(email="foobar@doesnotexist.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(mock_reset_signal.called)
 
-    def test_user_without_password(self):
-        """ Tests requesting a token for an email without a password doesn't work"""
-        response = self.rest_do_request_reset_token(email="user4@mail.com")
+    @override_settings(DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE=False)
+    def test_try_reset_password_email_does_not_exist_leakage_opt_in_legacy_behavior(self):
+        """
+        The deprecated DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE=False opt-in still
+        re-enables the 400-based user-enumeration oracle.
+        """
+        response = self.rest_do_request_reset_token(email="foobar@doesnotexist.com")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         decoded_response = json.loads(response.content.decode())
-        # response should have "email" in it
         self.assertTrue("email" in decoded_response)
+
+    def test_user_without_password(self):
+        """ Tests requesting a token for a user without password returns a generic 200 (no oracle) """
+        # Under the default (no-information-leakage) behavior, a user with no usable password is
+        # treated the same as a non-existent account: 200 OK, no token created.
+        response = self.rest_do_request_reset_token(email="user4@mail.com")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 0)
 
     @override_settings(DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD=False)
     @patch('django_rest_passwordreset.signals.reset_password_token_created.send')

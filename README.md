@@ -138,8 +138,13 @@ The following settings can be set in Django ``settings.py`` file:
 
   **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``.
 
-* `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - will cause a 200 to be returned on `POST ${API_URL}/reset_password/`
-  even if the user doesn't exist in the databse (Default: False) 
+* `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - when `True` (the default in the next release), a `200 OK` is
+  always returned on `POST ${API_URL}/reset_password/`, even if the user does not exist in the database,
+  so the endpoint does not expose account existence via HTTP status or response body (CWE-204). Setting this
+  to `False` restores the legacy behavior of returning a `400` for unknown accounts; this re-enables the
+  enumeration oracle and is **deprecated** (will be removed in a future major release).
+  Note: even with the default, a timing side channel may still distinguish existing from non-existing
+  accounts (the existing-account path performs a DB write and fires `reset_password_token_created`).
 
 * `DJANGO_REST_MULTITOKENAUTH_REQUIRE_USABLE_PASSWORD` - allows password reset for a user that does not 
   [have a usable password](https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.has_usable_password) (Default: True)

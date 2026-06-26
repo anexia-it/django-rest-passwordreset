@@ -75,15 +75,24 @@ def generate_token_for_email(email, user_agent='', ip_address=''):
             active_user_found = True
             break
 
-    # No active user found, raise a ValidationError
-    # but not if DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE == True, in that case we return None
+    # No active user found.
+    #
+    # By default (DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE is unset or True) we return None
+    # so that the caller responds with a generic 200 OK, identical to the response for an existing
+    # account. This avoids a status/body user-enumeration oracle (distinct 400 vs 200 based on
+    # account existence).
+    #
+    # The previous default (False) raised a ValidationError -> 400, leaking whether an account exists.
+    # That behavior is retained only as an explicit opt-in and is deprecated; it will be removed in a
+    # future major release.
     if not active_user_found:
-        if not getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', False):
-            raise exceptions.ValidationError({
-                'email': [_(
-                    "We couldn't find an account associated with that email. Please try a different e-mail address.")],
-            })
-        return None
+        no_information_leakage = getattr(settings, 'DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE', True)
+        if no_information_leakage:
+            return None
+        raise exceptions.ValidationError({
+            'email': [_(
+                "We couldn't find an account associated with that email. Please try a different e-mail address.")],
+        })
 
     # last but not least: iterate over all users that are active and can change their password
     # and create a Reset Password Token and send a signal with the created token

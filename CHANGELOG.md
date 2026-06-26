@@ -14,7 +14,27 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 - Added Django 6.0 support
 - Added Django Rest Framework 3.16 support
 
+### Security
+
+- The reset-token request endpoint (`POST .../reset_password/`) no longer exposes whether an
+  account exists via HTTP status or response body. Previously, by default, a request for a
+  non-existent (or inactive / no-usable-password) account returned HTTP 400 with an `email` error,
+  while an existing account returned HTTP 200 — a user-enumeration oracle (CWE-204). The default is
+  now to always return HTTP 200 with a generic body, matching the behavior of Django's built-in
+  password reset and common industry practice.
+  - The `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` setting now defaults to `True`.
+  - Explicitly setting it to `False` re-enables the legacy 400-based oracle; this opt-in is
+    deprecated and will be removed in a future major release.
+  - Note: a residual timing side channel remains (the existing-account path performs a DB write and
+    fires `reset_password_token_created`, which often triggers an SMTP send). The response-status
+    oracle is closed; the timing channel is not. A future hardening pass may equalize the two paths.
+
 ### Changed
+
+- **Breaking:** `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` default changed from `False` to `True`.
+  Clients that rendered UI based on the previous 400 response for unknown emails will now always receive 200.
+  Set `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = False` to temporarily restore the legacy behavior
+  (deprecated).
 - Removed Django 4.2 and 5.1 from the supported/tested matrix
 - Updated CI/CD pipelines to test currently supported Django/Python combinations
 - Updated PostgreSQL test service to version 14 (required by Django 5.2)
