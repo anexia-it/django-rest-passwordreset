@@ -1,0 +1,76 @@
+name: Run tests on mysql
+on: [push, pull_request]
+
+jobs:
+  test:
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: drpr_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -prootpassword"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+        django-version:
+          - "5.2"
+          - "6.0"
+        drf-version:
+          - "3.16"
+          - "3.17"
+        exclude:
+          - python-version: "3.10"
+            django-version: "6.0"
+          - python-version: "3.11"
+            django-version: "6.0"
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install mysqlclient setuptools
+
+    - name: Install Django version
+      run: |
+        python -m pip install "Django==${{ matrix.django-version }}.*"
+
+    - name: Install DRF version
+      run: |
+        python -m pip install "djangorestframework==${{ matrix.drf-version }}.*"
+
+    - name: Python, Django and DRF versions
+      run: |
+        echo "Python ${{ matrix.python-version }} -> Django ${{ matrix.django-version }} -> DRF ${{ matrix.drf-version }}"
+        python --version
+        echo "Django: `django-admin --version`"
+        echo "DRF: `pip show djangorestframework|grep Version|sed s/Version:\ //`"
+
+    - name: Setup environment
+      run: |
+        pip install -e .
+        python setup.py install
+
+    - name: Run tests
+      working-directory: ./tests
+      run: python manage.py test --settings=settings_mysql
