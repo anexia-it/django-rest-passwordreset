@@ -136,7 +136,34 @@ The following settings can be set in Django ``settings.py`` file:
 
 * `DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME` - time in hours about how long the token is active (Default: 24)
 
-  **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``.
+  **Please note**: expired tokens are automatically cleared based on this setting in every call of ``ResetPasswordRequestToken.post``. The token-validation and password-confirm endpoints do **not** run this bulk cleanup (an expired token presented there is rejected and deleted individually by the serializer); running a full-table cleanup on those high-frequency, attack-exposed endpoints would be a DoS amplification vector. For reliable DB hygiene without relying on reset requests coming in, schedule the management command below.
+
+### Token cleanup (expired-token removal)
+
+The package ships a management command to bulk-remove expired tokens:
+
+```
+python manage.py clearresetpasswodtokens
+```
+
+It deletes every ``ResetPasswordToken`` with ``created_at`` older than
+``DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME`` hours. **Schedule it** (cron, systemd timer,
+Celery beat, Django-Q, or
+[django-future-tasks](https://pypi.org/project/django-future-tasks/)) for periodic DB hygiene — for
+example once an hour or once a day:
+
+```
+# crontab example: clear expired reset tokens every hour at :05
+5 * * * * /path/to/venv/bin/python /path/to/manage.py clearresetpasswodtokens
+```
+
+This is the recommended way to keep the token table small. The cleanup query filters on indexed
+``created_at`` values, avoiding an unindexed scan before deleting matching rows.
+
+Individual expired tokens are *also* removed on use: when an expired token is submitted to the
+validate or confirm endpoint, the serializer deletes that single token and rejects the request
+(HTTP 404). The bulk command above is therefore about reclaiming rows for tokens that are never
+presented again, not about security enforcement.
 
 * `DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE` - when `True` (the default in the next release), a `200 OK` is
   always returned on `POST ${API_URL}/reset_password/`, even if the user does not exist in the database,

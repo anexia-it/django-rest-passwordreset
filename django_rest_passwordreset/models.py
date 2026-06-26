@@ -27,6 +27,11 @@ class ResetPasswordToken(models.Model):
     class Meta:
         verbose_name = _("Password Reset Token")
         verbose_name_plural = _("Password Reset Tokens")
+        # Speeds up `clear_expired` (a `created_at__lte` range scan + bulk delete) used by the
+        # `clearresetpasswodtokens` management command and the request-token endpoint cleanup.
+        indexes = [
+            models.Index(fields=["created_at"], name="drpr_token_created_at_idx"),
+        ]
 
     @staticmethod
     def generate_key():
