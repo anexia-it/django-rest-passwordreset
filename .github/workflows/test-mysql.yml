@@ -1,8 +1,21 @@
-name: Run linter and tests
+name: Run tests on mysql
 on: [push, pull_request]
 
 jobs:
   test:
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: drpr_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -prootpassword"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,14 +49,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 codecov setuptools
-
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        python -m pip install mysqlclient setuptools
 
     - name: Install Django version
       run: |
@@ -67,10 +73,4 @@ jobs:
 
     - name: Run tests
       working-directory: ./tests
-      run: |
-        ln -s ../django_rest_passwordreset django_rest_passwordreset
-        coverage run --source='./django_rest_passwordreset' manage.py test
-        coverage xml -o ../coverage.xml
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
+      run: python manage.py test --settings=settings_mysql
