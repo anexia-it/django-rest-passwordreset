@@ -13,6 +13,7 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 - Added Django 5.2 LTS support
 - Added Django 6.0 support
 - Added Django Rest Framework 3.16 support
+- Added Django Rest Framework 3.17 support
 - Added `DJANGO_REST_PASSWORDRESET_THROTTLE_CLASSES` to replace the request-token endpoint throttle
   classes. The default remains `ResetPasswordRequestTokenThrottle`; setting it to an empty list
   delegates the request-token endpoint to DRF's global `DEFAULT_THROTTLE_CLASSES`.

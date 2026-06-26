@@ -381,7 +381,7 @@ django-rest-passwordreset Version | Django Versions     | Django Rest Framework 
 1.3 | 3.2, 4.0, 4.1 | 3.12, 3.13, 3.14 | 3.7 - 3.10
 1.4 | 3.2, 4.2, 5.0 | 3.13, 3.14 | 3.8 - 3.12
 1.5 | 4.2, 5.0, 5.1 | 3.15 | 3.9 - 3.13
-1.6 (current) | 5.2, 6.0 | 3.16 | 3.10 - 3.14*
+1.6 (current) | 5.2, 6.0 | 3.16, 3.17 | 3.10 - 3.14*
 
 \* Django 6.0 is tested on Python 3.12 - 3.14, while Django 5.2 is tested on Python 3.10 - 3.14.
 
