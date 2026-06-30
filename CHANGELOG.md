@@ -8,6 +8,8 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 
 ## [Unreleased]
 
+## [1.6.0]
+
 ### Added
 - Added Python 3.14 support
 - Added Django 5.2 LTS support
@@ -167,7 +169,8 @@ PyPi: [https://pypi.org/project/django-rest-passwordreset/](https://pypi.org/pro
 ## [0.9.0]
 - Initial Release
 
-[Unreleased]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.5.0...HEAD
+[Unreleased]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.6.0...HEAD
+[1.6.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.5.0...1.6.0
 [1.5.0]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.4.2...1.5.0
 [1.4.2]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.4.1...1.4.2
 [1.4.1]: https://github.com/anexia-it/django-rest-passwordreset/compare/1.4.0...1.4.1
